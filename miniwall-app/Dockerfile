@@ -5,14 +5,14 @@ FROM node:25-alpine AS builder
 WORKDIR /app
 
 # Copy package files
-COPY mini-wall/package*.json ./mini-wall/
+COPY miniwall-app/package*.json ./miniwall-app/
 
 # Install dependencies
-WORKDIR /app/mini-wall
+WORKDIR /app/miniwall-app
 RUN npm ci --only=production
 
 # Copy source code
-COPY mini-wall/ .
+COPY miniwall-app/ .
 
 # Build the application
 RUN npm run build
@@ -24,13 +24,13 @@ FROM node:25-alpine AS production
 WORKDIR /app
 
 # Copy package files
-COPY mini-wall/package*.json ./
+COPY miniwall-app/package*.json ./
 
 # Install only production dependencies
 RUN npm ci --only=production && npm cache clean --force
 
 # Copy built application from builder stage
-COPY --from=builder /app/mini-wall/dist ./dist
+COPY --from=builder /app/miniwall-app/dist ./dist
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs

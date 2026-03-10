@@ -5,12 +5,12 @@ FROM node:25-alpine
 WORKDIR /app
 
 # Install dependencies
-COPY mini-wall/package*.json ./mini-wall/
-WORKDIR /app/mini-wall
+COPY miniwall-app/package*.json ./miniwall-app/
+WORKDIR /app/miniwall-app
 RUN npm install
 
 # Copy source code
-COPY mini-wall/ .
+COPY miniwall-app/ .
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs
