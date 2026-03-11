@@ -1,12 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 
 @Injectable()
 export class OAuth2Service {
   constructor(
     private authService: AuthService,
+    private jwtService: JwtService,
   ) {}
 
   async authorize(clientId: string, redirectUri: string, responseType: string, scope?: string) {
@@ -20,13 +22,13 @@ export class OAuth2Service {
   async token(grantType: string, clientId: string, clientSecret?: string, code?: string, refreshToken?: string) {
     // OAuth2 Token endpoint logic
     if (grantType === 'authorization_code') {
-      // Handle authorization code grant
+      if (!code) throw new Error('Authorization code is required');
       return this.handleAuthorizationCodeGrant(code, clientId);
     } else if (grantType === 'refresh_token') {
-      // Handle refresh token grant
+      if (!refreshToken) throw new Error('Refresh token is required');
       return this.authService.refreshToken(refreshToken);
     } else if (grantType === 'client_credentials') {
-      // Handle client credentials grant
+      if (!clientSecret) throw new Error('Client secret is required');
       return this.handleClientCredentialsGrant(clientId, clientSecret);
     }
     
@@ -57,7 +59,7 @@ export class OAuth2Service {
   async introspect(token: string) {
     // Token introspection endpoint
     try {
-      const payload = this.authService.jwtService.verify(token);
+      const payload = this.jwtService.verify(token);
       return {
         active: true,
         scope: 'read write',
