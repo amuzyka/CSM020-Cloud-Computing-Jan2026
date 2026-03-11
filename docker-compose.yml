@@ -1,0 +1,117 @@
+version: '3.8'
+
+services:
+  # Main App (Resource Server)
+  miniwall-app:
+    build:
+      context: ./miniwall-app
+      dockerfile: Dockerfile
+    container_name: miniwall-app
+    ports:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb-app:27017/miniwall
+      - AUTH_SERVER_URL=http://miniwall-auth-server:4000
+    volumes:
+      - miniwall-app-data:/app/data
+      - miniwall-logs:/app/logs
+    depends_on:
+      - mongodb-app
+      - miniwall-auth-server
+    networks:
+      - miniwall-network
+    restart: unless-stopped
+
+  # Auth Server (Authorization Server)
+  miniwall-auth-server:
+    build:
+      context: ./miniwall-auth-server
+      dockerfile: Dockerfile
+    container_name: miniwall-auth-server
+    ports:
+      - "4000"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb-auth:27017/miniwall-auth
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - PORT=4000
+    volumes:
+      - miniwall-auth-data:/app/data
+      - miniwall-logs:/app/logs
+    depends_on:
+      - mongodb-auth
+    networks:
+      - miniwall-network
+    restart: unless-stopped
+
+  # MongoDB for Main App
+  mongodb-app:
+    image: mongo:7
+    container_name: miniwall-mongodb-app
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_APP_ROOT_USERNAME:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_APP_ROOT_PASSWORD:-admin123}
+      - MONGO_INITDB_DATABASE=miniwall
+    ports:
+      - "27017"
+    volumes:
+      - mongodb-app-data:/data/db
+      - ./mongo-init-app.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - miniwall-network
+    restart: unless-stopped
+
+  # MongoDB for Auth Server
+  mongodb-auth:
+    image: mongo:7
+    container_name: miniwall-mongodb-auth
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_AUTH_ROOT_USERNAME:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_AUTH_ROOT_PASSWORD:-admin123}
+      - MONGO_INITDB_DATABASE=miniwall-auth
+    ports:
+      - "27017"
+    volumes:
+      - mongodb-auth-data:/data/db
+      - ./mongo-init-auth.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - miniwall-network
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: miniwall-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx-logs:/var/log/nginx
+    depends_on:
+      - miniwall-app
+      - miniwall-auth-server
+    networks:
+      - miniwall-network
+    restart: unless-stopped
+
+volumes:
+  # Shared volumes
+  miniwall-app-data:
+    driver: local
+  miniwall-auth-data:
+    driver: local
+  mongodb-app-data:
+    driver: local
+  mongodb-auth-data:
+    driver: local
+  miniwall-logs:
+    driver: local
+  nginx-logs:
+    driver: local
+
+networks:
+  miniwall-network:
+    driver: bridge
