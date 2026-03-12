@@ -1,5 +1,5 @@
-import { Controller, Post, Body, Query, Get, Res, HttpStatus } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Post, Body, Query, Get, Res } from '@nestjs/common';
+import { type Response } from 'express';
 import { OAuth2Service } from './oauth2.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
@@ -73,6 +73,8 @@ export class OAuth2Controller {
     return this.oauth2Service.revoke(body.token);
   }
 
+  //TODO: remove this endpoint in production
+  //decide if to use openid-configuration or not
   @Get('.well-known/openid_configuration')
   async openidConfiguration() {
     return {
