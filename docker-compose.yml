@@ -1,5 +1,9 @@
 version: '3.8'
 
+# Use production environment template
+env_file:
+  - .env.production.template
+
 services:
   # Main App (Resource Server)
   miniwall-app:
@@ -9,6 +13,8 @@ services:
     container_name: miniwall-app
     ports:
       - "3000"
+    env_file:
+      - .env.production.template
     environment:
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongodb-app:27017/miniwall
@@ -31,6 +37,8 @@ services:
     container_name: miniwall-auth-server
     ports:
       - "4000"
+    env_file:
+      - .env.production.template
     environment:
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongodb-auth:27017/miniwall-auth
@@ -49,6 +57,8 @@ services:
   mongodb-app:
     image: mongo:7
     container_name: miniwall-mongodb-app
+    env_file:
+      - .env.production.template
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_APP_ROOT_USERNAME:-admin}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_APP_ROOT_PASSWORD:-admin123}
@@ -66,6 +76,8 @@ services:
   mongodb-auth:
     image: mongo:7
     container_name: miniwall-mongodb-auth
+    env_file:
+      - .env.production.template
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_AUTH_ROOT_USERNAME:-admin}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_AUTH_ROOT_PASSWORD:-admin123}
