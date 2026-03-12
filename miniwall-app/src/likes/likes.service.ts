@@ -17,7 +17,7 @@ export class LikesService {
     return this.likeModel.find().exec();
   }
 
-  async findOne(id: string): Promise<Like> {
+  async findOne(id: string): Promise<Like | null> {
     return this.likeModel.findOne({ _id: id }).exec();
   }
 
@@ -29,15 +29,15 @@ export class LikesService {
     return this.likeModel.find({ userId }).exec();
   }
 
-  async findByPostAndUser(postId: string, userId: string): Promise<Like> {
+  async findByPostAndUser(postId: string, userId: string): Promise<Like | null> {
     return this.likeModel.findOne({ postId, userId }).exec();
   }
 
-  async remove(postId: string, userId: string): Promise<Like> {
+  async remove(postId: string, userId: string): Promise<Like | null> {
     return this.likeModel.findOneAndDelete({ postId, userId }).exec();
   }
 
-  async removeById(id: string): Promise<Like> {
+  async removeById(id: string): Promise<Like | null> {
     return this.likeModel.findByIdAndDelete(id).exec();
   }
 }

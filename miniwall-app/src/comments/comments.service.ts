@@ -18,7 +18,7 @@ export class CommentsService {
     return this.commentModel.find({ isDeleted: false }).sort({ createdAt: -1 }).exec();
   }
 
-  async findOne(id: string): Promise<Comment> {
+  async findOne(id: string): Promise<Comment | null> {
     return this.commentModel.findOne({ _id: id, isDeleted: false }).exec();
   }
 
@@ -36,15 +36,15 @@ export class CommentsService {
       .exec();
   }
 
-  async update(id: string, updateCommentDto: UpdateCommentDto): Promise<Comment> {
+  async update(id: string, updateCommentDto: UpdateCommentDto): Promise<Comment | null> {
     return this.commentModel
-      .findByIdAndUpdate(id, updateCommentDto, { new: true })
+      .findOneAndUpdate({ _id: id, isDeleted: false }, updateCommentDto, { new: true })
       .exec();
   }
 
-  async remove(id: string): Promise<Comment> {
+  async remove(id: string): Promise<Comment | null> {
     return this.commentModel
-      .findByIdAndUpdate(id, { isDeleted: true }, { new: true })
+      .findOneAndUpdate({ _id: id, isDeleted: false }, { isDeleted: true }, { new: true })
       .exec();
   }
 }

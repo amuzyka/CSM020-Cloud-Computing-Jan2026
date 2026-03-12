@@ -21,7 +21,7 @@ export class PostsService {
       .exec();
   }
 
-  async findOne(id: string): Promise<Post> {
+  async findOne(id: string): Promise<Post | null> {
     return this.postModel.findOne({ _id: id, isPublished: true }).exec();
   }
 
@@ -32,35 +32,35 @@ export class PostsService {
       .exec();
   }
 
-  async update(id: string, updatePostDto: UpdatePostDto): Promise<Post> {
+  async update(id: string, updatePostDto: UpdatePostDto): Promise<Post | null> {
     return this.postModel
-      .findByIdAndUpdate(id, updatePostDto, { new: true })
+      .findOneAndUpdate({ _id: id, isPublished: true }, updatePostDto, { new: true })
       .exec();
   }
 
-  async remove(id: string): Promise<Post> {
+  async remove(id: string): Promise<Post | null> {
     return this.postModel.findByIdAndDelete(id).exec();
   }
 
-  async incrementLikeCount(postId: string): Promise<Post> {
+  async softDelete(id: string): Promise<Post | null> {
     return this.postModel
-      .findByIdAndUpdate(postId, { $inc: { likeCount: 1 } }, { new: true })
+      .findOneAndUpdate({ _id: id }, { isPublished: false }, { new: true })
       .exec();
   }
 
-  async decrementLikeCount(postId: string): Promise<Post> {
+  async incrementLikeCount(postId: string): Promise<Post | null> {
     return this.postModel
-      .findByIdAndUpdate(postId, { $inc: { likeCount: -1 } }, { new: true })
+      .findOneAndUpdate({ _id: postId }, { $inc: { likeCount: 1 } }, { new: true })
       .exec();
   }
 
-  async incrementCommentCount(postId: string): Promise<Post> {
+  async incrementCommentCount(postId: string): Promise<Post | null> {
     return this.postModel
       .findByIdAndUpdate(postId, { $inc: { commentCount: 1 } }, { new: true })
       .exec();
   }
 
-  async decrementCommentCount(postId: string): Promise<Post> {
+  async decrementCommentCount(postId: string): Promise<Post | null> {
     return this.postModel
       .findByIdAndUpdate(postId, { $inc: { commentCount: -1 } }, { new: true })
       .exec();
