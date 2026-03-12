@@ -30,7 +30,7 @@ export class User {
 export const UserSchema = SchemaFactory.createForClass(User);
 
 // Pre-save hook to hash password
-UserSchema.pre('save', async function (next) {
+UserSchema.pre('save', async function(next: any) {
   if (!this.isModified('password')) return next();
   
   const bcrypt = require('bcryptjs');

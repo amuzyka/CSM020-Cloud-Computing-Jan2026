@@ -1,8 +1,8 @@
 version: '3.8'
 
-# Use development environment template
+# Use development environment file
 env_file:
-  - .env.development.template
+  - .env.development
 
 services:
   # Main App (Resource Server) - Development
@@ -15,7 +15,7 @@ services:
       - "3000:3000"
       - "9229:9229"  # Debug port
     env_file:
-      - .env.development.template
+      - .env.development
     environment:
       - NODE_ENV=development
       - MONGODB_URI=mongodb://mongodb-app:27017/miniwall-dev
@@ -44,7 +44,7 @@ services:
       - "4000:4000"
       - "9230:9230"  # Debug port
     env_file:
-      - .env.development.template
+      - .env.development
     environment:
       - NODE_ENV=development
       - MONGODB_URI=mongodb://mongodb-auth:27017/miniwall-auth-dev
@@ -68,7 +68,7 @@ services:
     image: mongo:7
     container_name: miniwall-mongodb-app-dev
     env_file:
-      - .env.development.template
+      - .env.development
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=admin123
@@ -87,7 +87,7 @@ services:
     image: mongo:7
     container_name: miniwall-mongodb-auth-dev
     env_file:
-      - .env.development.template
+      - .env.development
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=admin123
