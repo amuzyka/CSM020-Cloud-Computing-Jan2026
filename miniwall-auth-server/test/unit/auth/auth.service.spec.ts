@@ -30,14 +30,46 @@ describe('AuthService', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     }),
+    save: jest.fn().mockResolvedValue({
+      _id: 'user123',
+      username: 'testuser',
+      email: 'test@example.com',
+      roles: ['user'],
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }),
   };
 
   const mockUserModel = {
     findOne: jest.fn(),
-    create: jest.fn(),
-    save: jest.fn(),
     findById: jest.fn(),
+    create: jest.fn().mockResolvedValue(mockUser),
   };
+
+  // Mock constructor
+  const MockUserModel = jest.fn((userData) => {
+    const userInstance = {
+      ...userData,
+      ...mockUser,
+      save: jest.fn().mockResolvedValue(mockUser),
+      toObject: jest.fn().mockReturnValue({
+        _id: 'user123',
+        username: 'testuser',
+        email: 'test@example.com',
+        roles: ['user'],
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }),
+    };
+    return userInstance;
+  }) as any;
+
+  // Assign static methods
+  MockUserModel.findOne = mockUserModel.findOne;
+  MockUserModel.findById = mockUserModel.findById;
+  MockUserModel.create = mockUserModel.create;
 
   const mockJwtService = {
     sign: jest.fn(),
@@ -50,7 +82,7 @@ describe('AuthService', () => {
         AuthService,
         {
           provide: getModelToken(User.name),
-          useValue: mockUserModel,
+          useValue: MockUserModel,
         },
         {
           provide: JwtService,
@@ -69,11 +101,11 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('should return access and refresh tokens with user info', () => {
+    it('should return access and refresh tokens with user info', async () => {
       const payload = { username: 'testuser', sub: 'user123', roles: ['user'] };
       mockJwtService.sign.mockReturnValue('mock-jwt-token');
 
-      const result = service.login(mockUser);
+      const result = await service.login(mockUser);
 
       expect(mockJwtService.sign).toHaveBeenCalledWith(payload);
       expect(mockJwtService.sign).toHaveBeenCalledWith(payload, { expiresIn: '7d' });
@@ -167,7 +199,7 @@ describe('AuthService', () => {
       mockJwtService.verify.mockReturnValue(payload);
       mockUserModel.findById.mockResolvedValue(null);
 
-      await expect(service.refreshToken(refreshToken)).rejects.toThrow('Invalid token');
+      await expect(service.refreshToken(refreshToken)).rejects.toThrow('Invalid refresh token');
     });
   });
 });
