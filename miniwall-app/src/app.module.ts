@@ -7,6 +7,10 @@ import { UserSchema } from './users/schemas/user.schema';
 import { PostSchema } from './posts/schemas/post.schema';
 import { CommentSchema } from './comments/schemas/comment.schema';
 import { LikeSchema } from './likes/schemas/like.schema';
+import { UsersModule } from './users/users.module';
+import { PostsModule } from './posts/posts.module';
+import { CommentsModule } from './comments/comments.module';
+import { LikesModule } from './likes/likes.module';
 
 @Module({
   imports: [
@@ -20,6 +24,10 @@ import { LikeSchema } from './likes/schemas/like.schema';
       { name: 'Comment', schema: CommentSchema },
       { name: 'Like', schema: LikeSchema },
     ]),
+    UsersModule,
+    PostsModule,
+    CommentsModule,
+    LikesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
