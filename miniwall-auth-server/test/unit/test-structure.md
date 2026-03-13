@@ -11,6 +11,10 @@ test/unit/
 │   ├── auth.controller.spec.ts
 │   ├── oauth2.service.spec.ts
 │   ├── oauth2.controller.spec.ts
+│   ├── services/
+│   │   └── client.service.spec.ts
+│   ├── controllers/
+│   │   └── client.controller.spec.ts
 │   └── strategies/
 │       └── jwt.strategy.spec.ts
 ├── app.controller.spec.ts
@@ -28,9 +32,10 @@ test/unit/
 
 ### Specific Test Categories
 - `npm run test:auth` - Run only auth service tests
-- `npm run test:controllers` - Run only controller tests (auth + app controllers)
+- `npm run test:controllers` - Run only controller tests (auth + app + client controllers)
 - `npm run test:oauth2` - Run only OAuth2 related tests
 - `npm run test:strategies` - Run only JWT strategy tests
+- `npm run test:clients` - Run only client management tests
 
 ### Other Test Commands
 - `npm run test` - Run all tests (unit + e2e)
@@ -72,6 +77,22 @@ test/unit/
 - Payload processing
 - Error handling for invalid tokens
 
+### ClientService Tests
+- Client creation (confidential and public)
+- Client validation (credentials, redirect URIs, scopes)
+- Client lifecycle management (activate/deactivate)
+- Secret regeneration
+- CRUD operations
+- Security features
+
+### ClientController Tests
+- Client registration endpoint
+- Client management endpoints
+- Client validation endpoint
+- Security guards (JWT, API Key)
+- Error handling
+- Response security (no secret exposure)
+
 ## Running Tests
 
 ### Quick Start
@@ -94,11 +115,14 @@ npm run test:auth
 # Test only OAuth2 functionality
 npm run test:oauth2
 
-# Test only controllers (includes auth and app controllers)
+# Test only controllers (includes auth, app, and client controllers)
 npm run test:controllers
 
 # Test only JWT strategies
 npm run test:strategies
+
+# Test only client management
+npm run test:clients
 ```
 
 ## Configuration

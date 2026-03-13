@@ -21,6 +21,7 @@
     "test:controllers": "jest --config test/unit/jest.config.ts --testPathPattern=\"controller.spec.ts|app.controller.spec.ts\"",
     "test:oauth2": "jest --config test/unit/jest.config.ts --testPathPattern=oauth2",
     "test:strategies": "jest --config test/unit/jest.config.ts --testPathPattern=strategies",
+    "test:clients": "jest --config test/unit/jest.config.ts --testPathPattern=client",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
