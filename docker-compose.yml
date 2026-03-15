@@ -1,9 +1,5 @@
 version: '3.8'
 
-# Use production environment file
-env_file:
-  - .env.production
-
 services:
   # Main App (Resource Server)
   miniwall-app:

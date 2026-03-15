@@ -1,0 +1,137 @@
+version: '3.8'
+
+# Use development environment file
+env_file:
+  - .env.development
+
+services:
+  # Main App (Resource Server) - Development
+  miniwall-app:
+    build:
+      context: ./miniwall-app
+      dockerfile: Dockerfile.dev
+    container_name: miniwall-app-dev
+    ports:
+      - "3000:3000"
+      - "9229:9229"  # Debug port
+    env_file:
+      - .env.development
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongodb-app:27017/miniwall-dev
+      - AUTH_SERVER_URL=http://miniwall-auth-server:4000
+    volumes:
+      # Shared volume for development with hot reload
+      - ./miniwall-app:/app
+      - /app/node_modules  # Prevent node_modules from being overwritten
+      - miniwall-app-dev-data:/app/data
+      - miniwall-dev-logs:/app/logs
+    command: npm run start:dev
+    depends_on:
+      - mongodb-app
+      - miniwall-auth-server
+    networks:
+      - miniwall-network
+    restart: unless-stopped
+
+  # Auth Server (Authorization Server) - Development
+  miniwall-auth-server:
+    build:
+      context: ./miniwall-auth-server
+      dockerfile: Dockerfile.dev
+    container_name: miniwall-auth-server-dev
+    ports:
+      - "4000:4000"
+      - "9230:9230"  # Debug port
+    env_file:
+      - .env.development
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongodb-auth:27017/miniwall-auth-dev
+      - JWT_SECRET=dev-jwt-secret-key-change-in-production
+      - PORT=4000
+    volumes:
+      # Shared volume for development with hot reload
+      - ./miniwall-auth-server:/app
+      - /app/node_modules  # Prevent node_modules from being overwritten
+      - miniwall-auth-dev-data:/app/data
+      - miniwall-dev-logs:/app/logs
+    command: npm run start:dev
+    depends_on:
+      - mongodb-auth
+    networks:
+      - miniwall-network
+    restart: unless-stopped
+
+  # MongoDB for Main App - Development
+  mongodb-app:
+    image: mongo:7
+    container_name: miniwall-mongodb-app-dev
+    env_file:
+      - .env.development
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin123
+      - MONGO_INITDB_DATABASE=miniwall-dev
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-app-dev-data:/data/db
+      - ./mongo-init-app.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - miniwall-network
+    restart: unless-stopped
+
+  # MongoDB for Auth Server - Development
+  mongodb-auth:
+    image: mongo:7
+    container_name: miniwall-mongodb-auth-dev
+    env_file:
+      - .env.development
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin123
+      - MONGO_INITDB_DATABASE=miniwall-auth-dev
+    ports:
+      - "27018:27017"  # Different port to avoid conflict with local MongoDB
+    volumes:
+      - mongodb-auth-dev-data:/data/db
+      - ./mongo-init-auth.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ./mongo-init-client.js:/docker-entrypoint-initdb.d/mongo-init-client.js:ro
+    networks:
+      - miniwall-network
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy - Development
+  nginx:
+    image: nginx:alpine
+    container_name: miniwall-nginx-dev
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+      - miniwall-dev-logs:/var/log/nginx
+    depends_on:
+      - miniwall-app
+      - miniwall-auth-server
+    networks:
+      - miniwall-network
+    restart: unless-stopped
+
+volumes:
+  # Shared volumes for development
+  miniwall-app-dev-data:
+    driver: local
+  miniwall-auth-dev-data:
+    driver: local
+  mongodb-app-dev-data:
+    driver: local
+  mongodb-auth-dev-data:
+    driver: local
+  miniwall-dev-logs:
+    driver: local
+
+networks:
+  miniwall-network:
+    driver: bridge
