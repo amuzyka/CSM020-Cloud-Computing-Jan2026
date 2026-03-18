@@ -1,9 +1,5 @@
 version: '3.8'
 
-# Use development environment file
-env_file:
-  - .env.development
-
 services:
   # Main App (Resource Server) - Development
   miniwall-app:
