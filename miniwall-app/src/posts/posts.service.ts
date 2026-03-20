@@ -17,7 +17,8 @@ export class PostsService {
   async findAll(): Promise<Post[]> {
     return this.postModel
       .find({ isPublished: true })
-      .sort({ createdAt: -1 })
+      // Popular posts (more likes) first; ties resolved by newest posts first.
+      .sort({ likeCount: -1, createdAt: -1 })
       .exec();
   }
 
