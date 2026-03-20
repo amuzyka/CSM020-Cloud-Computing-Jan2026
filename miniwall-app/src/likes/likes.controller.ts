@@ -8,11 +8,14 @@ import {
   HttpCode,
   HttpStatus,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { LikesService } from './likes.service';
 import { CreateLikeDto } from './dto/create-like.dto';
+import { OAuth2ResourceGuard } from '../auth/oauth2-resource.guard';
 
 @Controller('likes')
+@UseGuards(OAuth2ResourceGuard)
 export class LikesController {
   constructor(private readonly likesService: LikesService) {}
 

@@ -9,12 +9,15 @@ import {
   HttpCode,
   HttpStatus,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { OAuth2ResourceGuard } from '../auth/oauth2-resource.guard';
 
 @Controller('comments')
+@UseGuards(OAuth2ResourceGuard)
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
