@@ -32,4 +32,4 @@ import { LikesModule } from './likes/likes.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class MiniWallAppModule {}
