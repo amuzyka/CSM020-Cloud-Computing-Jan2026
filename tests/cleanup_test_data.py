@@ -86,45 +86,77 @@ def cleanup_test_data():
     if not credentials:
         return False
     
-    auth_base_url = "http://localhost/api/auth"
-    app_base_url = "http://localhost"
+    # FIXED: Correct URLs matching nginx config (no /api/ prefix)
+    base_url = "http://localhost"
+    auth_base_url = f"{base_url}/auth"
+    app_base_url = base_url
     
     try:
         headers = {"Authorization": f"Bearer {credentials['jwt_token']}"}
+        oauth_headers = {"Authorization": f"Bearer {credentials['oauth2_token']}"}
         
         # 1. Delete OAuth2 client
         print("1. Deleting OAuth2 clients...")
-        clients_response = requests.get(f"{auth_base_url}/clients", headers=headers)
+        # FIXED: Use base_url for /clients endpoint (not auth_base_url)
+        clients_response = requests.get(f"{base_url}/clients", headers=headers)
         if clients_response.status_code == 200:
-            clients = clients_response.json().get("clients", [])
-            for client in clients:
-                if "test" in client.get("name", "").lower():
-                    delete_response = requests.delete(f"{auth_base_url}/clients/{client['_id']}", headers=headers)
-                    if delete_response.status_code in [200, 204]:
-                        print(f"   Deleted client: {client['name']}")
+            clients = clients_response.json()
+            # Handle both array and object with clients property
+            if isinstance(clients, dict):
+                clients = clients.get("clients", [])
+            if isinstance(clients, list):
+                for client in clients:
+                    if "test" in client.get("name", "").lower():
+                        client_id = client.get("_id") or client.get("id")
+                        if client_id:
+                            # FIXED: Use base_url for delete endpoint
+                            delete_response = requests.delete(
+                                f"{base_url}/clients/{client_id}", 
+                                headers=headers
+                            )
+                            if delete_response.status_code in [200, 204]:
+                                print(f"   Deleted client: {client.get('name', 'Unknown')}")
         
         # 2. Delete test posts
         print("2. Deleting test posts...")
-        posts_response = requests.get(f"{app_base_url}/posts", headers={"Authorization": f"Bearer {credentials['oauth2_token']}"})
+        posts_response = requests.get(
+            f"{app_base_url}/posts", 
+            headers=oauth_headers
+        )
         if posts_response.status_code == 200:
             posts = posts_response.json()
             if isinstance(posts, list):
                 for post in posts:
-                    if any(test_user in post.get("authorId", "") for test_user in ["olga", "nick", "mary"]):
-                        delete_response = requests.delete(f"{app_base_url}/posts/{post['_id']}", 
-                                                        headers={"Authorization": f"Bearer {credentials['oauth2_token']}"})
-                        if delete_response.status_code in [200, 204]:
-                            print(f"   Deleted post by {post.get('authorId')}")
+                    author_id = post.get("authorId", "")
+                    if any(test_user in str(author_id) for test_user in ["olga", "nick", "mary"]):
+                        post_id = post.get("_id") or post.get("id")
+                        if post_id:
+                            delete_response = requests.delete(
+                                f"{app_base_url}/posts/{post_id}", 
+                                headers=oauth_headers
+                            )
+                            if delete_response.status_code in [200, 204]:
+                                print(f"   Deleted post by {author_id}")
         
         # 3. Delete test users
         print("3. Deleting test users...")
         test_users = ["olga", "nick", "mary", "test_client_user"]
         for username in test_users:
-            # Note: This would require an admin endpoint or direct database access
-            print(f"   User '{username}' cleanup requires manual intervention")
+            # Try to delete via auth service if endpoint exists
+            try:
+                # This assumes your auth service has a delete endpoint
+                delete_user_response = requests.delete(
+                    f"{auth_base_url}/users/{username}",
+                    headers=headers
+                )
+                if delete_user_response.status_code in [200, 204]:
+                    print(f"   Deleted user: {username}")
+                else:
+                    print(f"   User '{username}' cleanup skipped (status: {delete_user_response.status_code})")
+            except Exception:
+                print(f"   User '{username}' cleanup requires manual intervention or admin endpoint")
         
         # 4. Remove credentials file
-        import os
         if os.path.exists("test_credentials.json"):
             os.remove("test_credentials.json")
             print("   Removed test credentials file")
@@ -137,6 +169,8 @@ def cleanup_test_data():
         return False
     except Exception as e:
         print(f"Cleanup failed: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 def main():
@@ -145,8 +179,9 @@ def main():
     print("=" * 30)
     
     # Clean up test data first (while services are running)
-    if not cleanup_test_data():
-        print("\nTest data cleanup failed, but continuing with service cleanup...")
+    cleanup_attempted = cleanup_test_data()
+    if not cleanup_attempted:
+        print("\nTest data cleanup failed or no credentials found, continuing with service cleanup...")
     
     # Stop services
     stop_services()

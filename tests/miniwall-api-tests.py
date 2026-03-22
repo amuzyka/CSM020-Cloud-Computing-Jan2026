@@ -192,9 +192,11 @@ class MiniWallAPITester:
         }
         
         headers = {"Authorization": f"Bearer {jwt_token}"}
+        
+        # FIXED: Use app_base_url for /clients/ endpoint (not auth_base_url)
         client_response = self.make_request(
             "POST",
-            f"{self.auth_base_url}/clients",
+            f"{self.app_base_url}/clients",
             headers=headers,
             json=client_data
         )

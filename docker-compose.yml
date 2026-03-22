@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   # Main App (Resource Server)
@@ -13,7 +12,7 @@ services:
     environment:
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongodb-app:27017/miniwall
-      - AUTH_SERVER_URL=http://miniwall-auth-server:4000
+      - AUTH_SERVER_URL=http://miniwall-auth-server
     volumes:
       - miniwall-app-data:/app/data
       - miniwall-logs:/app/logs

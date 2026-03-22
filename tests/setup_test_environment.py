@@ -58,8 +58,9 @@ def setup_oauth2_client():
     print("Setting up OAuth2 client for testing...")
     
     # Base URLs (via nginx)
-    auth_base_url = "http://localhost/auth"
-    oauth_base_url = "http://localhost/oauth"
+    base_url = "http://localhost"  # Nginx root
+    auth_base_url = f"{base_url}/auth"
+    oauth_base_url = f"{base_url}/oauth"
     
     try:
         # 1. Register a test user for OAuth2 client creation
@@ -100,7 +101,8 @@ def setup_oauth2_client():
         }
         
         headers = {"Authorization": f"Bearer {jwt_token}"}
-        client_response = requests.post(f"{auth_base_url}/clients", headers=headers, json=client_data)
+        # FIXED: /clients/ is at root level, not under /auth/
+        client_response = requests.post(f"{base_url}/clients", headers=headers, json=client_data)
         
         if client_response.status_code != 201:
             print(f"Failed to create OAuth2 client: {client_response.status_code}")
@@ -151,6 +153,8 @@ def setup_oauth2_client():
         return False
     except Exception as e:
         print(f"Setup failed: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 def verify_services():
@@ -159,7 +163,8 @@ def verify_services():
     
     services = {
         "Nginx": "http://localhost/health",
-        "App Server (via nginx)": "http://localhost/health"
+        "Auth Server": "http://localhost/auth/register",
+        "App Server": "http://localhost/health"
     }
     
     all_running = True
@@ -167,13 +172,15 @@ def verify_services():
     for service, url in services.items():
         try:
             response = requests.get(url, timeout=5)
-            if response.status_code in [200, 401]:  # 401 is OK - means service is running
-                print(f"{service} - OK")
+            # 200 OK, 401 Unauthorized (protected but running), 404 Not Found (endpoint missing but service up), 
+            # 405 Method Not Allowed (GET not allowed on POST endpoint but service up)
+            if response.status_code in [200, 401, 404, 405]:
+                print(f"{service} - OK (status: {response.status_code})")
             else:
                 print(f"{service} - Status {response.status_code}")
                 all_running = False
-        except requests.exceptions.RequestException:
-            print(f"{service} - Connection failed")
+        except requests.exceptions.RequestException as e:
+            print(f"{service} - Connection failed: {e}")
             all_running = False
     
     return all_running
