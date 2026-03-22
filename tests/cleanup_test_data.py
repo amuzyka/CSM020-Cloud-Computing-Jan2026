@@ -7,6 +7,8 @@ Removes test users, clients, and data created during testing
 import requests
 import json
 import sys
+import subprocess
+import os
 
 def load_credentials():
     """Load test credentials from file"""
@@ -16,6 +18,65 @@ def load_credentials():
     except FileNotFoundError:
         print("No test credentials found. Run setup first.")
         return None
+
+def stop_services():
+    """Stop Docker services"""
+    print("Stopping Docker services...")
+    try:
+        result = subprocess.run(['docker-compose', '-f', 'docker-compose.dev.yml', 'down'], 
+                              capture_output=True, text=True, cwd='..')
+        if result.returncode == 0:
+            print("Services stopped successfully")
+            return True
+        else:
+            print(f"Failed to stop services: {result.stderr}")
+            return False
+    except Exception as e:
+        print(f"Error stopping services: {e}")
+        return False
+
+def remove_volumes():
+    """Remove Docker volumes"""
+    print("Removing Docker volumes...")
+    try:
+        result = subprocess.run(['docker-compose', '-f', 'docker-compose.dev.yml', 'down', '-v'], 
+                              capture_output=True, text=True, cwd='..')
+        if result.returncode == 0:
+            print("Volumes removed successfully")
+            return True
+        else:
+            print(f"Failed to remove volumes: {result.stderr}")
+            return False
+    except Exception as e:
+        print(f"Error removing volumes: {e}")
+        return False
+
+def remove_images():
+    """Remove Docker images"""
+    print("Removing Docker images...")
+    try:
+        # Get image names from docker-compose
+        result = subprocess.run(['docker-compose', '-f', 'docker-compose.dev.yml', 'config'], 
+                              capture_output=True, text=True, cwd='..')
+        
+        if result.returncode == 0:
+            # Extract service names and remove their images
+            services = ['miniwall-app', 'miniwall-auth-server', 'mongodb-app', 'mongodb-auth']
+            for service in services:
+                try:
+                    # Remove the service image
+                    image_result = subprocess.run(['docker', 'rmi', f'miniwall-{service}-dev'], 
+                                                  capture_output=True, text=True)
+                    if image_result.returncode == 0:
+                        print(f"Removed image: miniwall-{service}-dev")
+                except Exception:
+                    pass  # Ignore if image doesn't exist
+        
+        print("Image removal completed")
+        return True
+    except Exception as e:
+        print(f"Error removing images: {e}")
+        return False
 
 def cleanup_test_data():
     """Clean up test data"""
@@ -83,9 +144,25 @@ def main():
     print("MiniWall Test Data Cleanup")
     print("=" * 30)
     
+    # Clean up test data first (while services are running)
     if not cleanup_test_data():
-        print("\nCleanup failed")
-        sys.exit(1)
+        print("\nTest data cleanup failed, but continuing with service cleanup...")
+    
+    # Stop services
+    stop_services()
+    
+    # Ask user about volumes and images
+    try:
+        response = input("\nRemove Docker volumes? (y/N): ").strip().lower()
+        if response in ['y', 'yes']:
+            remove_volumes()
+        
+        response = input("Remove Docker images? (y/N): ").strip().lower()
+        if response in ['y', 'yes']:
+            remove_images()
+            
+    except KeyboardInterrupt:
+        print("\nCleanup interrupted by user")
     
     print("\nCleanup complete!")
 

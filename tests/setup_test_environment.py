@@ -7,6 +7,51 @@ Sets up OAuth2 client and test data for the MiniWall API test suite
 import requests
 import json
 import sys
+import subprocess
+import time
+
+def start_services_if_needed():
+    """Start Docker services if they're not running"""
+    print("Checking if services are running...")
+    
+    try:
+        # Check if services are already running
+        result = subprocess.run(['docker-compose', '-f', 'docker-compose.dev.yml', 'ps'], 
+                              capture_output=True, text=True, cwd='..')
+        
+        if 'Up' in result.stdout and result.returncode == 0:
+            print("Services are already running")
+            return True
+    except Exception:
+        pass
+    
+    print("Starting services...")
+    try:
+        # Start services
+        result = subprocess.run(['docker-compose', '-f', 'docker-compose.dev.yml', 'up', '-d'], 
+                              capture_output=True, text=True, cwd='..')
+        
+        if result.returncode != 0:
+            print(f"Failed to start services: {result.stderr}")
+            return False
+        
+        print("Waiting for services to be ready...")
+        time.sleep(10)  # Give services time to start
+        
+        # Verify services are running
+        result = subprocess.run(['docker-compose', '-f', 'docker-compose.dev.yml', 'ps'], 
+                              capture_output=True, text=True, cwd='..')
+        
+        if 'Up' in result.stdout and result.returncode == 0:
+            print("Services started successfully")
+            return True
+        else:
+            print("Services may not have started properly")
+            return False
+            
+    except Exception as e:
+        print(f"Error starting services: {e}")
+        return False
 
 def setup_oauth2_client():
     """Set up OAuth2 client for testing"""
@@ -138,10 +183,17 @@ def main():
     print("MiniWall Test Environment Setup")
     print("=" * 40)
     
+    # Start services if not running
+    if not start_services_if_needed():
+        print("\nFailed to start services. Please check Docker configuration.")
+        sys.exit(1)
+    
+    print()
+    
     # Verify services are running
     if not verify_services():
-        print("\nSome services are not running. Please start the services first:")
-        print("   docker-compose -f docker-compose.dev.yml up -d")
+        print("\nServices are not responding correctly. Please check the logs:")
+        print("   docker-compose -f docker-compose.dev.yml logs")
         sys.exit(1)
     
     print()
