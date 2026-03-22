@@ -9,9 +9,9 @@ This document provides instructions for running comprehensive test cases for the
 Make sure all MiniWall services are running through nginx:
 - Nginx Reverse Proxy: `http://localhost` (port 80)
 - Auth Server: Available via nginx at `/auth/`
-- App Server: Available via nginx at `/` and `/app/`
+- App Server: Available via nginx at `/`
 - OAuth2 Endpoints: Available via nginx at `/oauth/`
-- Client Management: Available via nginx at `/auth/clients/`
+- Client Management: Available via nginx at `/clients/`
 
 Check with:
 ```bash
@@ -144,7 +144,7 @@ To debug specific test failures, examine the JSON results file for detailed erro
 ### Auth Server (via nginx)
 - `POST /auth/register` - User registration
 - `POST /auth/login` - User login
-- `POST /auth/clients` - OAuth2 client registration
+- `POST /clients` - OAuth2 client registration
 - `POST /oauth/token` - OAuth2 token endpoint
 
 ### App Server (via nginx)
