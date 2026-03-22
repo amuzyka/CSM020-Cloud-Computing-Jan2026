@@ -31,8 +31,20 @@ pip3 install -r tests/requirements.txt
 ## Running the Tests
 
 ### Execute All Test Cases
+
+First, set up the test environment:
+```bash
+python3 tests/setup_test_environment.py
+```
+
+Then run the test suite:
 ```bash
 python3 tests/miniwall-api-tests.py
+```
+
+Optional - Clean up test data:
+```bash
+python3 tests/cleanup_test_data.py
 ```
 
 ### Test Cases Covered
