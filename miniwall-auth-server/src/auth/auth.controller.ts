@@ -53,6 +53,10 @@ export class AuthController {
       if (error instanceof ConflictException) {
         throw error;
       }
+      // Handle service-level "User already exists" error (UnauthorizedException)
+      if (error instanceof UnauthorizedException && error.message?.includes('already exists')) {
+        throw new ConflictException('User already exists');
+      }
       // Handle MongoDB duplicate key error (username/email already exists)
       if (error.code === 11000) {
         const field = Object.keys(error.keyValue || {})[0];

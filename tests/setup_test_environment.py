@@ -71,7 +71,7 @@ def setup_oauth2_client():
             "password": "client123"
         }
         
-        response = requests.post(f"{auth_base_url}/auth/register", json=register_data)
+        response = requests.post(f"{auth_base_url}/register", json=register_data)
         if response.status_code not in [200, 201]:
             if response.status_code in [400, 500]:
                 print("User may already exist, attempting login...")
@@ -82,7 +82,7 @@ def setup_oauth2_client():
         
         # 2. Login to get JWT token
         print("2. Getting JWT token...")
-        login_response = requests.post(f"{auth_base_url}/auth/login", 
+        login_response = requests.post(f"{auth_base_url}/login", 
                                      json={"username": "test_client_user", "password": "client123"})
         
         if login_response.status_code != 201:

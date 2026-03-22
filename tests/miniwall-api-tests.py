@@ -159,7 +159,7 @@ class MiniWallAPITester:
         
         response = self.make_request(
             "POST",
-            f"{self.auth_base_url}/auth/register",
+            f"{self.auth_base_url}/register",
             json=register_data
         )
         
@@ -173,7 +173,7 @@ class MiniWallAPITester:
         # Login to get JWT token
         login_response = self.make_request(
             "POST",
-            f"{self.auth_base_url}/auth/login",
+            f"{self.auth_base_url}/login",
             json={"username": "test_client_user", "password": "client123"}
         )
         
@@ -261,23 +261,30 @@ class MiniWallAPITester:
                 "password": user.password
             }
             
-            register_response = self.make_request(
-                "POST",
-                f"{self.auth_base_url}/auth/register",
-                json=register_data
-            )
+            register_response = None
+            try:
+                register_response = self.make_request(
+                    "POST",
+                    f"{self.auth_base_url}/register",
+                    json=register_data
+                )
+            except Exception as e:
+                print(f"DEBUG: Register request exception: {e}")
+                import traceback
+                traceback.print_exc()
             
-            if register_response and register_response.status_code in [200, 201]:
+            if register_response is not None and register_response.status_code in [200, 201]:
                 self.log_test(f"Register {user.username}", True, "Successfully registered user")
                 success_count += 1
-            elif register_response and register_response.status_code == 401:
-                # User might already exist, try to get info
+            elif register_response is not None and register_response.status_code in [401, 409]:
+                # User might already exist (401 from UnauthorizedException or 409 Conflict)
                 self.log_test(f"Register {user.username}", True, 
                             "User already exists, will authenticate in TC2")
                 success_count += 1
             else:
+                status = register_response.status_code if register_response is not None else "None"
                 self.log_test(f"Register {user.username}", False, 
-                            "Failed to register user", register_response)
+                            f"Failed to register user (status: {status})", register_response)
             
             # Set temporary auth_user_id for now
             user.auth_user_id = user.username
@@ -302,7 +309,7 @@ class MiniWallAPITester:
             
             login_response = self.make_request(
                 "POST",
-                f"{self.auth_base_url}/auth/login",
+                f"{self.auth_base_url}/login",
                 json=login_data
             )
             

@@ -11,6 +11,7 @@ import {
   BadRequestException,
   InternalServerErrorException,
   ConflictException,
+  ForbiddenException,
   UseGuards,
 } from '@nestjs/common';
 import { LikesService } from './likes.service';
@@ -40,6 +41,10 @@ export class LikesController {
       // Handle CastError (invalid ObjectId in DTO)
       if (error.name === 'CastError') {
         throw new BadRequestException(`Invalid ${error.path}: ${error.value}`);
+      }
+      // Re-throw NestJS exceptions as-is (ForbiddenException for self-likes, etc.)
+      if (error instanceof ForbiddenException || error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
       }
       // Generic error fallback
       throw new InternalServerErrorException('Failed to create like');
