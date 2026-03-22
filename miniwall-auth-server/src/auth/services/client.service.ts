@@ -12,7 +12,7 @@ export class ClientService {
     private clientModel: Model<ClientDocument>,
   ) {}
 
-  async create(createClientDto: CreateClientDto): Promise<Client> {
+  async create(createClientDto: CreateClientDto): Promise<ClientDocument> {
     const clientId = this.generateClientId();
     const clientSecret = createClientDto.isPublic ? null : this.generateClientSecret();
 
@@ -25,11 +25,11 @@ export class ClientService {
     return client.save();
   }
 
-  async findAll(): Promise<Client[]> {
+  async findAll(): Promise<ClientDocument[]> {
     return this.clientModel.find().sort({ createdAt: -1 }).exec();
   }
 
-  async findById(id: string): Promise<Client> {
+  async findById(id: string): Promise<ClientDocument> {
     const client = await this.clientModel.findById(id).exec();
     if (!client) {
       throw new NotFoundException('Client not found');
@@ -37,7 +37,7 @@ export class ClientService {
     return client;
   }
 
-  async findByClientId(clientId: string): Promise<Client> {
+  async findByClientId(clientId: string): Promise<ClientDocument> {
     const client = await this.clientModel.findOne({ clientId, isActive: true }).exec();
     if (!client) {
       throw new NotFoundException('Client not found or inactive');
@@ -45,7 +45,7 @@ export class ClientService {
     return client;
   }
 
-  async validateClient(clientId: string, clientSecret?: string): Promise<Client> {
+  async validateClient(clientId: string, clientSecret?: string): Promise<ClientDocument> {
     const client = await this.findByClientId(clientId);
 
     // Public clients don't need secret validation
@@ -81,7 +81,7 @@ export class ClientService {
     return validScopes;
   }
 
-  async update(id: string, updateData: Partial<CreateClientDto>): Promise<Client> {
+  async update(id: string, updateData: Partial<CreateClientDto>): Promise<ClientDocument> {
     const client = await this.findById(id);
     
     // Don't allow updating client ID or secret through this method

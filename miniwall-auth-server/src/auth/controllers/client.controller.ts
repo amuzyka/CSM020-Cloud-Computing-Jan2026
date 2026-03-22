@@ -14,6 +14,7 @@ import { ClientService } from '../services/client.service';
 import { CreateClientDto } from '../dto/create-client.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ApiKeyGuard } from '../guards/api-key.guard';
+import { ClientDocument } from '../schemas/client.schema';
 
 @Controller('clients')
 export class ClientController {
