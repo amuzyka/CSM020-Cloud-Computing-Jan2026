@@ -1,13 +1,15 @@
 version: '3.8'
 
 services:
-  # Main App (Resource Server) - Development
+  # Main App (Resource Server) - Development with Debug
   miniwall-app:
     build:
       context: ./miniwall-app
       dockerfile: Dockerfile.dev
-    container_name: miniwall-app-dev
-    # Internal only - accessible via nginx
+    container_name: miniwall-app-dev-debug
+    ports:
+      - "3000:3000"  # Direct access for development
+      - "9229:9229"  # Debug port
     env_file:
       - .env.development
     environment:
@@ -28,13 +30,15 @@ services:
       - miniwall-network
     restart: unless-stopped
 
-  # Auth Server (Authorization Server) - Development
+  # Auth Server (Authorization Server) - Development with Debug
   miniwall-auth-server:
     build:
       context: ./miniwall-auth-server
       dockerfile: Dockerfile.dev
-    container_name: miniwall-auth-server-dev
-    # Internal only - accessible via nginx
+    container_name: miniwall-auth-server-dev-debug
+    ports:
+      - "4000:4000"  # Direct access for development
+      - "9230:9230"  # Debug port
     env_file:
       - .env.development
     environment:
@@ -58,16 +62,17 @@ services:
   # MongoDB for Main App - Development
   mongodb-app:
     image: mongo:8.0
-    container_name: miniwall-mongodb-app-dev
+    container_name: miniwall-mongodb-app-dev-debug
     env_file:
       - .env.development
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=admin123
       - MONGO_INITDB_DATABASE=miniwall-dev
-    # Internal only - accessible via nginx
+    ports:
+      - "27017:27017"  # Direct access for development
     volumes:
-      - mongodb-app-dev-data:/data/db
+      - mongodb-app-dev-debug-data:/data/db
       - ./mongo-init-app.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
       - miniwall-network
@@ -76,16 +81,17 @@ services:
   # MongoDB for Auth Server - Development
   mongodb-auth:
     image: mongo:8.0
-    container_name: miniwall-mongodb-auth-dev
+    container_name: miniwall-mongodb-auth-dev-debug
     env_file:
       - .env.development
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=admin123
       - MONGO_INITDB_DATABASE=miniwall-auth-dev
-    # Internal only - accessible via nginx
+    ports:
+      - "27018:27017"  # Different port to avoid conflict with local MongoDB
     volumes:
-      - mongodb-auth-dev-data:/data/db
+      - mongodb-auth-dev-debug-data:/data/db
       - ./mongo-init-auth.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
       - miniwall-network
@@ -94,7 +100,7 @@ services:
   # Nginx Reverse Proxy - Development
   nginx:
     image: nginx:alpine
-    container_name: miniwall-nginx-dev
+    container_name: miniwall-nginx-dev-debug
     ports:
       - "80:80"
       - "443:443"
@@ -114,9 +120,9 @@ volumes:
     driver: local
   miniwall-auth-dev-data:
     driver: local
-  mongodb-app-dev-data:
+  mongodb-app-dev-debug-data:
     driver: local
-  mongodb-auth-dev-data:
+  mongodb-auth-dev-debug-data:
     driver: local
   miniwall-dev-logs:
     driver: local

@@ -7,8 +7,7 @@ services:
       context: ./miniwall-app
       dockerfile: Dockerfile
     container_name: miniwall-app
-    ports:
-      - "3000"
+    # Internal only - accessible via nginx
     env_file:
       - .env.production
     environment:
@@ -31,8 +30,7 @@ services:
       context: ./miniwall-auth-server
       dockerfile: Dockerfile
     container_name: miniwall-auth-server
-    ports:
-      - "4000"
+    # Internal only - accessible via nginx
     env_file:
       - .env.production
     environment:
@@ -59,8 +57,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_APP_ROOT_USERNAME:-admin}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_APP_ROOT_PASSWORD:-admin123}
       - MONGO_INITDB_DATABASE=miniwall
-    ports:
-      - "27017"
+    # Internal only - accessible via nginx
     volumes:
       - mongodb-app-data:/data/db
       - ./mongo-init-app.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
@@ -78,8 +75,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_AUTH_ROOT_USERNAME:-admin}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_AUTH_ROOT_PASSWORD:-admin123}
       - MONGO_INITDB_DATABASE=miniwall-auth
-    ports:
-      - "27017"
+    # Internal only - accessible via nginx
     volumes:
       - mongodb-auth-data:/data/db
       - ./mongo-init-auth.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
