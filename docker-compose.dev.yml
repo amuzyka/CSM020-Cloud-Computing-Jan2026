@@ -11,7 +11,7 @@ services:
     environment:
       - NODE_ENV=development
       - MONGODB_URI=mongodb://admin:admin123@mongodb-app:27017/miniwall?authSource=admin
-      - AUTH_SERVER_URL=http://miniwall-auth-server
+      - AUTH_SERVER_URL=http://miniwall-auth-server:4000
     volumes:
       - ./miniwall-app:/app
       - /app/node_modules  

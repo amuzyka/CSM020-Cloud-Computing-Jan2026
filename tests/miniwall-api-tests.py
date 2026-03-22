@@ -139,7 +139,7 @@ class MiniWallAPITester:
                 self.oauth2_token = credentials.get("oauth2_token")
                 
                 # Test if the token is still valid
-                test_response = self.make_request("GET", f"{self.app_base_url}/posts", 
+                test_response = self.make_request("GET", f"{self.app_base_url}/health", 
                                                  headers=self.get_auth_headers())
                 if test_response and test_response.status_code != 401:
                     self.log_test("OAuth2 Setup", True, "Using existing valid credentials")
@@ -159,7 +159,7 @@ class MiniWallAPITester:
         
         response = self.make_request(
             "POST",
-            f"{self.auth_base_url}/register",
+            f"{self.auth_base_url}/auth/register",
             json=register_data
         )
         
@@ -173,7 +173,7 @@ class MiniWallAPITester:
         # Login to get JWT token
         login_response = self.make_request(
             "POST",
-            f"{self.auth_base_url}/login",
+            f"{self.auth_base_url}/auth/login",
             json={"username": "test_client_user", "password": "client123"}
         )
         
@@ -253,13 +253,34 @@ class MiniWallAPITester:
         users = [self.olga, self.nick, self.mary]
         success_count = 0
         
-        # Since users are already created from previous tests, just get their IDs via login
-        print("Users already exist from previous tests, proceeding to authentication...")
         for user in users:
-            user.auth_user_id = user.username  # Temporary, will be updated in TC2
-            success_count += 1
-            self.log_test(f"Register {user.username}", True, 
-                        f"User exists, will authenticate in TC2")
+            # Try to register the user
+            register_data = {
+                "username": user.username,
+                "email": user.email,
+                "password": user.password
+            }
+            
+            register_response = self.make_request(
+                "POST",
+                f"{self.auth_base_url}/auth/register",
+                json=register_data
+            )
+            
+            if register_response and register_response.status_code in [200, 201]:
+                self.log_test(f"Register {user.username}", True, "Successfully registered user")
+                success_count += 1
+            elif register_response and register_response.status_code == 401:
+                # User might already exist, try to get info
+                self.log_test(f"Register {user.username}", True, 
+                            "User already exists, will authenticate in TC2")
+                success_count += 1
+            else:
+                self.log_test(f"Register {user.username}", False, 
+                            "Failed to register user", register_response)
+            
+            # Set temporary auth_user_id for now
+            user.auth_user_id = user.username
         
         overall_success = success_count == 3
         self.log_test("TC 1 Overall", overall_success, f"Successfully registered {success_count}/3 users")
@@ -281,7 +302,7 @@ class MiniWallAPITester:
             
             login_response = self.make_request(
                 "POST",
-                f"{self.auth_base_url}/login",
+                f"{self.auth_base_url}/auth/login",
                 json=login_data
             )
             

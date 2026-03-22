@@ -12,7 +12,7 @@ services:
     environment:
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongodb-app:27017/miniwall
-      - AUTH_SERVER_URL=http://miniwall-auth-server
+      - AUTH_SERVER_URL=http://miniwall-auth-server:4000
     volumes:
       - miniwall-app-data:/app/data
       - miniwall-logs:/app/logs
