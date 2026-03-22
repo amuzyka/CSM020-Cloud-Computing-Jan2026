@@ -51,7 +51,7 @@ services:
 
   # MongoDB for Main App
   mongodb-app:
-    image: mongo:7
+    image: mongo:8.0
     container_name: miniwall-mongodb-app
     env_file:
       - .env.production
@@ -70,7 +70,7 @@ services:
 
   # MongoDB for Auth Server
   mongodb-auth:
-    image: mongo:7
+    image: mongo:8.0
     container_name: miniwall-mongodb-auth
     env_file:
       - .env.production
