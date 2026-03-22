@@ -13,6 +13,8 @@ export class TokenService {
   async introspectToken(token: string): Promise<any> {
     try {
       const authServerUrl = this.configService.get<string>('AUTH_SERVER_URL', 'http://localhost:4000');
+      const clientId = this.configService.get<string>('OAUTH2_CLIENT_ID', 'miniwall-client');
+      const clientSecret = this.configService.get<string>('OAUTH2_CLIENT_SECRET', 'miniwall-client-secret');
 
       const authServerBaseUrl = authServerUrl.replace(/\/$/, '');
       const introspectUrl = `${authServerBaseUrl}/oauth/introspect`;
@@ -20,7 +22,7 @@ export class TokenService {
       const response = await firstValueFrom(
         this.httpService.post<any>(
           introspectUrl,
-          { token },
+          { token, client_id: clientId, client_secret: clientSecret },
           { headers: { 'Content-Type': 'application/json' } },
         )
       );
