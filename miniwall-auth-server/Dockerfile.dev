@@ -3,20 +3,12 @@ FROM node:25-alpine
 
 WORKDIR /app
 
-# Install dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm ci && npm cache clean --force
 
-# Change ownership of node_modules before switching user
-RUN chown -R nestjs:nodejs /app/node_modules
-
-# Copy source code
-COPY . .
-RUN chown -R nestjs:nodejs /app
-
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nestjs -u 1001
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001 && \
+    chown -R nestjs:nodejs /app
 USER nestjs
 
 # Expose port
