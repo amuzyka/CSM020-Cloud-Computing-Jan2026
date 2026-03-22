@@ -3,7 +3,7 @@ import { Document } from 'mongoose';
 
 export type CommentDocument = Comment & Document;
 
-@Schema()
+@Schema({ autoIndex: true })
 export class Comment {
   @Prop({ required: true })
   postId: string;

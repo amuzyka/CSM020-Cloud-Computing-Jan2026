@@ -3,7 +3,7 @@ import { Document } from 'mongoose';
 
 export type PostDocument = Post & Document;
 
-@Schema()
+@Schema({ autoIndex: true })
 export class Post {
   @Prop({ required: true })
   authorId: string;

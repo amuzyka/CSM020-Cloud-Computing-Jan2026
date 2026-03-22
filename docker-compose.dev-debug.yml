@@ -14,7 +14,7 @@ services:
       - .env.development
     environment:
       - NODE_ENV=development
-      - MONGODB_URI=mongodb://admin:admin123@mongodb-app:27017/miniwall-dev?authSource=admin
+      - MONGODB_URI=mongodb://admin:admin123@mongodb-app:27017/miniwall?authSource=admin
       - AUTH_SERVER_URL=http://miniwall-auth-server:4000
     volumes:
       # Shared volume for development with hot reload
@@ -68,12 +68,11 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=admin123
-      - MONGO_INITDB_DATABASE=miniwall-dev
+      - MONGO_INITDB_DATABASE=miniwall
     ports:
       - "27017:27017"  # Direct access for development
     volumes:
       - mongodb-app-dev-debug-data:/data/db
-      - ./mongo-init-app.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
       - miniwall-network
     restart: unless-stopped

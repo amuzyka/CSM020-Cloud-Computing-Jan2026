@@ -3,7 +3,7 @@ import { Document } from 'mongoose';
 
 export type LikeDocument = Like & Document;
 
-@Schema()
+@Schema({ autoIndex: true })
 export class Like {
   @Prop({ required: true })
   postId: string;

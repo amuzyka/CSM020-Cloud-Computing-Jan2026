@@ -60,7 +60,6 @@ services:
     # Internal only - accessible via nginx
     volumes:
       - mongodb-app-data:/data/db
-      - ./mongo-init-app.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
       - miniwall-network
     restart: unless-stopped

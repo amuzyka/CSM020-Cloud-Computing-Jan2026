@@ -16,7 +16,10 @@ import { LikesModule } from './likes/likes.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/miniwall-dev'),
+    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/miniwall', {
+  autoCreate: true,
+  autoIndex: true,
+}),
     MongooseModule.forFeature([
       { name: 'User', schema: UserSchema },
       { name: 'Post', schema: PostSchema },

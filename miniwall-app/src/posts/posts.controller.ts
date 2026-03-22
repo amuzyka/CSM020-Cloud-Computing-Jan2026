@@ -2,19 +2,23 @@ import {
   Controller,
   Get,
   Post,
-  Body,
   Patch,
-  Param,
   Delete,
+  Param,
+  Body,
   HttpCode,
   HttpStatus,
   NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+  ConflictException,
   UseGuards,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { OAuth2ResourceGuard } from '../auth/oauth2-resource.guard';
+import { isValidObjectId } from 'mongoose';
 
 @Controller('posts')
 @UseGuards(OAuth2ResourceGuard)
@@ -22,44 +26,135 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Post()
-  create(@Body() createPostDto: CreatePostDto) {
-    return this.postsService.create(createPostDto);
+  @HttpCode(HttpStatus.CREATED)
+  async create(@Body() createPostDto: CreatePostDto) {
+    try {
+      return await this.postsService.create(createPostDto);
+    } catch (error) {
+      // Handle MongoDB duplicate key error
+      if (error.code === 11000) {
+        throw new ConflictException('Duplicate post entry detected');
+      }
+      // Handle validation errors
+      if (error.name === 'ValidationError') {
+        throw new BadRequestException(error.message);
+      }
+      // Handle CastError (invalid ObjectId in DTO)
+      if (error.name === 'CastError') {
+        throw new BadRequestException(`Invalid ${error.path}: ${error.value}`);
+      }
+      throw new BadRequestException('Failed to create post: ' + error.message);
+    }
   }
 
   @Get()
-  findAll() {
-    return this.postsService.findAll();
+  async findAll() {
+    try {
+      return await this.postsService.findAll();
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch posts: ' + error.message);
+    }
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    const post = await this.postsService.findOne(id);
-    if (!post) {
-      throw new NotFoundException('Post not found');
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid post ID format');
     }
-    return post;
+
+    try {
+      const post = await this.postsService.findOne(id);
+      if (!post) {
+        throw new NotFoundException(`Post with ID "${id}" not found`);
+      }
+      return post;
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      if (error.name === 'CastError') {
+        throw new BadRequestException('Invalid post ID format');
+      }
+      throw new InternalServerErrorException('Failed to retrieve post');
+    }
   }
 
   @Get('author/:authorId')
-  findByAuthor(@Param('authorId') authorId: string) {
-    return this.postsService.findByAuthor(authorId);
+  async findByAuthor(@Param('authorId') authorId: string) {
+    if (!isValidObjectId(authorId)) {
+      throw new BadRequestException('Invalid author ID format');
+    }
+
+    try {
+      const posts = await this.postsService.findByAuthor(authorId);
+      // Note: Returning empty array is valid - no need to throw 404
+      return posts || [];
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      if (error.name === 'CastError') {
+        throw new BadRequestException('Invalid author ID format');
+      }
+      throw new InternalServerErrorException('Failed to fetch posts for author');
+    }
   }
 
   @Patch(':id')
+  @HttpCode(HttpStatus.OK)
   async update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    const post = await this.postsService.update(id, updatePostDto);
-    if (!post) {
-      throw new NotFoundException('Post not found');
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid post ID format');
     }
-    return post;
+
+    // Validate DTO is not empty
+    if (!updatePostDto || Object.keys(updatePostDto).length === 0) {
+      throw new BadRequestException('Update data cannot be empty');
+    }
+
+    try {
+      const post = await this.postsService.update(id, updatePostDto);
+      if (!post) {
+        throw new NotFoundException(`Post with ID "${id}" not found`);
+      }
+      return post;
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      if (error.code === 11000) {
+        throw new ConflictException('Duplicate post entry detected');
+      }
+      if (error.name === 'ValidationError') {
+        throw new BadRequestException(error.message);
+      }
+      if (error.name === 'CastError') {
+        throw new BadRequestException('Invalid data format in update');
+      }
+      throw new InternalServerErrorException('Failed to update post');
+    }
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
-    const post = await this.postsService.remove(id);
-    if (!post) {
-      throw new NotFoundException('Post not found');
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid post ID format');
+    }
+
+    try {
+      const post = await this.postsService.remove(id);
+      if (!post) {
+        throw new NotFoundException(`Post with ID "${id}" not found`);
+      }
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      if (error.name === 'CastError') {
+        throw new BadRequestException('Invalid post ID format');
+      }
+      throw new InternalServerErrorException('Failed to delete post');
     }
   }
 }

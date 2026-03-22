@@ -10,7 +10,10 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/miniwall-auth'),
+    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/miniwall-auth', {
+  autoCreate: true,
+  autoIndex: true,
+}),
     AuthModule,
   ],
   controllers: [AppController],
