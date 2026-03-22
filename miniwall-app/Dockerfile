@@ -1,50 +1,40 @@
-# Use Node.js 25 Alpine as base image
+# Build stage
 FROM node:25-alpine AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
+RUN npm ci  # All deps for build
 
-# Install dependencies
-RUN npm ci --only=production
-
-# Copy source code
 COPY . .
-
-# Build the application
 RUN npm run build
 
 # Production stage
 FROM node:25-alpine AS production
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+ENV NODE_ENV=production
 
-# Install only production dependencies
+# Install curl for healthcheck
+RUN apk add --no-cache curl
+
+COPY package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
-# Copy built application from builder stage
+# Copy built app AND package.json (needed for npm scripts)
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json ./  
 
 # Create non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nestjs -u 1001
-
-# Change ownership of the app directory to the nestjs user
-RUN chown -R nestjs:nodejs /app
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001 && \
+    chown -R nestjs:nodejs /app
 USER nestjs
 
-# Expose port
 EXPOSE 3000
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3000/health || exit 1
 
-# Start the application
 CMD ["npm", "run", "start:prod"]
