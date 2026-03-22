@@ -26,3 +26,9 @@ logs/
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Test credentials and generated files
+tests/test_credentials.json
+tests/*.log
+tests/miniwall_test_results_*.json
+tests/miniwall_test_report_*.md

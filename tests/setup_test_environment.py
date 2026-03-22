@@ -13,8 +13,8 @@ def setup_oauth2_client():
     print("Setting up OAuth2 client for testing...")
     
     # Base URLs
-    auth_base_url = "http://localhost/api/auth"
-    oauth_base_url = "http://localhost/oauth"
+    auth_base_url = "http://localhost:4000/api"
+    oauth_base_url = "http://localhost:4000/api/oauth"
     
     try:
         # 1. Register a test user for OAuth2 client creation
@@ -25,7 +25,7 @@ def setup_oauth2_client():
             "password": "client123"
         }
         
-        response = requests.post(f"{auth_base_url}/register", json=register_data)
+        response = requests.post(f"{auth_base_url}/auth/register", json=register_data)
         if response.status_code not in [200, 201]:
             if response.status_code == 401:
                 print("User may already exist, attempting login...")
@@ -36,7 +36,7 @@ def setup_oauth2_client():
         
         # 2. Login to get JWT token
         print("2. Getting JWT token...")
-        login_response = requests.post(f"{auth_base_url}/login", 
+        login_response = requests.post(f"{auth_base_url}/auth/login", 
                                      json={"username": "test_client_user", "password": "client123"})
         
         if login_response.status_code != 201:
@@ -114,7 +114,8 @@ def verify_services():
     
     services = {
         "Nginx": "http://localhost/health",
-        "App Server": "http://localhost/posts"  # Test actual endpoint we use
+        "Auth Server": "http://localhost:4000/api/health",
+        "App Server": "http://localhost:3000/health"
     }
     
     all_running = True

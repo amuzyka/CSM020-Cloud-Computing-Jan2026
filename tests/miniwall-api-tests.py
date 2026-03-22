@@ -106,6 +106,9 @@ class MiniWallAPITester:
     def make_request(self, method: str, url: str, **kwargs) -> requests.Response:
         """Make HTTP request with error handling"""
         try:
+            # Add default timeout if not specified
+            if 'timeout' not in kwargs:
+                kwargs['timeout'] = 10
             response = self.session.request(method, url, **kwargs)
             return response
         except requests.exceptions.RequestException as e:
@@ -318,8 +321,8 @@ class MiniWallAPITester:
         )
         
         # Check if requests are properly protected (should return 401)
-        get_protected = response and response.status_code == 401
-        post_protected = create_response and create_response.status_code == 401
+        get_protected = (response is not None and response.status_code == 401)
+        post_protected = (create_response is not None and create_response.status_code == 401)
         
         success = get_protected or post_protected
         self.log_test("TC 3 Overall", success, 
@@ -351,8 +354,8 @@ class MiniWallAPITester:
         success = response and response.status_code == 201
         if success:
             post = response.json()
-            self.created_posts.append({"id": post.get("id"), "author": "olga"})
-            self.log_test("TC 4", True, f"Post created with ID: {post.get('id')}")
+            self.created_posts.append({"id": post.get("_id"), "author": "olga"})
+            self.log_test("TC 4", True, f"Post created with ID: {post.get('_id')}")
         else:
             self.log_test("TC 4", False, "Failed to create post", 
                         response.text if response else "No response")
@@ -384,8 +387,8 @@ class MiniWallAPITester:
         success = response and response.status_code == 201
         if success:
             post = response.json()
-            self.created_posts.append({"id": post.get("id"), "author": "nick"})
-            self.log_test("TC 5", True, f"Post created with ID: {post.get('id')}")
+            self.created_posts.append({"id": post.get("_id"), "author": "nick"})
+            self.log_test("TC 5", True, f"Post created with ID: {post.get('_id')}")
         else:
             self.log_test("TC 5", False, "Failed to create post", 
                         response.text if response else "No response")
@@ -417,8 +420,8 @@ class MiniWallAPITester:
         success = response and response.status_code == 201
         if success:
             post = response.json()
-            self.created_posts.append({"id": post.get("id"), "author": "mary"})
-            self.log_test("TC 6", True, f"Post created with ID: {post.get('id')}")
+            self.created_posts.append({"id": post.get("_id"), "author": "mary"})
+            self.log_test("TC 6", True, f"Post created with ID: {post.get('_id')}")
         else:
             self.log_test("TC 6", False, "Failed to create post", 
                         response.text if response else "No response")
@@ -487,7 +490,7 @@ class MiniWallAPITester:
                 self.log_test(f"Comment by {commenter.username}", False, "Missing token or user ID")
                 continue
             
-            headers = {"Authorization": f"Bearer {commenter.jwt_token}"}
+            headers = self.get_auth_headers()  # Use OAuth2 token for API access
             comment_data = {
                 "postId": mary_post["id"],
                 "authorId": commenter.user_id,
@@ -503,10 +506,10 @@ class MiniWallAPITester:
             
             if response and response.status_code == 201:
                 comment = response.json()
-                self.created_comments.append({"id": comment.get("id"), "author": commenter.username})
+                self.created_comments.append({"id": comment.get("_id"), "author": commenter.username})
                 success_count += 1
                 self.log_test(f"Comment by {commenter.username}", True, 
-                            f"Comment created with ID: {comment.get('id')}")
+                            f"Comment created with ID: {comment.get('_id')}")
             else:
                 self.log_test(f"Comment by {commenter.username}", False, 
                             "Failed to create comment", 
@@ -531,11 +534,11 @@ class MiniWallAPITester:
             self.log_test("TC 9", False, "Mary's post not found")
             return False
         
-        if not self.mary.jwt_token or not self.mary.user_id:
-            self.log_test("TC 9", False, "Mary missing token or user ID")
+        if not self.oauth2_token or not self.mary.user_id:
+            self.log_test("TC 9", False, "Missing OAuth2 token or user ID")
             return False
         
-        headers = {"Authorization": f"Bearer {self.mary.jwt_token}"}
+        headers = self.get_auth_headers()  # Use OAuth2 token for API access
         comment_data = {
             "postId": mary_post["id"],
             "authorId": self.mary.user_id,
@@ -550,20 +553,21 @@ class MiniWallAPITester:
         )
         
         # Should fail with 400 or 403
-        success = response and response.status_code in [400, 403]
+        success = (response is not None and response.status_code in [400, 403])
+        status_msg = f"got {response.status_code}" if response is not None else "No response"
         self.log_test("TC 9", success, 
-                    f"Expected failure (400/403), got {response.status_code if response else 'No response'}")
+                    f"Expected failure (400/403), {status_msg}")
         return success
     
     def tc10_mary_browse_posts(self):
         """TC 10. Mary can see posts in reverse chronological order (newest posts are on the top as there are no likes yet)."""
         print("=== TC 10: Mary Browse Posts ===")
         
-        if not self.mary.jwt_token:
-            self.log_test("TC 10", False, "Mary missing token")
+        if not self.oauth2_token:
+            self.log_test("TC 10", False, "Missing OAuth2 token")
             return False
         
-        headers = {"Authorization": f"Bearer {self.mary.jwt_token}"}
+        headers = self.get_auth_headers()  # Use OAuth2 token for API access
         response = self.make_request("GET", f"{self.app_base_url}/posts", headers=headers)
         
         success = response and response.status_code == 200
@@ -595,11 +599,11 @@ class MiniWallAPITester:
             self.log_test("TC 11", False, "Mary's post not found")
             return False
         
-        if not self.mary.jwt_token:
-            self.log_test("TC 11", False, "Mary missing token")
+        if not self.oauth2_token:
+            self.log_test("TC 11", False, "Missing OAuth2 token")
             return False
         
-        headers = {"Authorization": f"Bearer {self.mary.jwt_token}"}
+        headers = self.get_auth_headers()  # Use OAuth2 token for API access
         response = self.make_request(
             "GET",
             f"{self.app_base_url}/comments/post/{mary_post['id']}",
@@ -643,7 +647,7 @@ class MiniWallAPITester:
                 self.log_test(f"Like by {liker.username}", False, "Missing token or user ID")
                 continue
             
-            headers = {"Authorization": f"Bearer {liker.jwt_token}"}
+            headers = self.get_auth_headers()  # Use OAuth2 token for API access
             like_data = {
                 "postId": mary_post["id"],
                 "userId": liker.user_id
@@ -658,10 +662,10 @@ class MiniWallAPITester:
             
             if response and response.status_code == 201:
                 like = response.json()
-                self.created_likes.append({"id": like.get("id"), "user": liker.username})
+                self.created_likes.append({"id": like.get("_id"), "user": liker.username})
                 success_count += 1
                 self.log_test(f"Like by {liker.username}", True, 
-                            f"Like created with ID: {like.get('id')}")
+                            f"Like created with ID: {like.get('_id')}")
             else:
                 self.log_test(f"Like by {liker.username}", False, 
                             "Failed to create like", 
@@ -686,11 +690,11 @@ class MiniWallAPITester:
             self.log_test("TC 13", False, "Mary's post not found")
             return False
         
-        if not self.mary.jwt_token or not self.mary.user_id:
-            self.log_test("TC 13", False, "Mary missing token or user ID")
+        if not self.oauth2_token:
+            self.log_test("TC 13", False, "Missing OAuth2 token")
             return False
         
-        headers = {"Authorization": f"Bearer {self.mary.jwt_token}"}
+        headers = self.get_auth_headers()  # Use OAuth2 token for API access
         like_data = {
             "postId": mary_post["id"],
             "userId": self.mary.user_id
@@ -704,9 +708,10 @@ class MiniWallAPITester:
         )
         
         # Should fail with 400 or 403
-        success = response and response.status_code in [400, 403]
+        success = (response is not None and response.status_code in [400, 403])
+        status_msg = f"got {response.status_code}" if response is not None else "No response"
         self.log_test("TC 13", success, 
-                    f"Expected failure (400/403), got {response.status_code if response else 'No response'}")
+                    f"Expected failure (400/403), {status_msg}")
         return success
     
     def tc14_mary_see_likes(self):
@@ -724,11 +729,11 @@ class MiniWallAPITester:
             self.log_test("TC 14", False, "Mary's post not found")
             return False
         
-        if not self.mary.jwt_token:
-            self.log_test("TC 14", False, "Mary missing token")
+        if not self.oauth2_token:
+            self.log_test("TC 14", False, "Missing OAuth2 token")
             return False
         
-        headers = {"Authorization": f"Bearer {self.mary.jwt_token}"}
+        headers = self.get_auth_headers()  # Use OAuth2 token for API access
         response = self.make_request(
             "GET",
             f"{self.app_base_url}/likes/post/{mary_post['id']}",
@@ -753,11 +758,11 @@ class MiniWallAPITester:
         """TC 15. Nick can see the list of posts, since Mary's post has two likes it is shown at the top."""
         print("=== TC 15: Nick See Posts (Liked Posts First) ===")
         
-        if not self.nick.jwt_token:
-            self.log_test("TC 15", False, "Nick missing token")
+        if not self.oauth2_token:
+            self.log_test("TC 15", False, "Missing OAuth2 token")
             return False
         
-        headers = {"Authorization": f"Bearer {self.nick.jwt_token}"}
+        headers = self.get_auth_headers()  # Use OAuth2 token for API access
         response = self.make_request("GET", f"{self.app_base_url}/posts", headers=headers)
         
         success = response and response.status_code == 200
