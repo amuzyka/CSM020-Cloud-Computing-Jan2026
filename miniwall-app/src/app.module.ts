@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { UserSchema } from './users/schemas/user.schema';
 import { PostSchema } from './posts/schemas/post.schema';
 import { CommentSchema } from './comments/schemas/comment.schema';
@@ -30,6 +29,5 @@ import { LikesModule } from './likes/likes.module';
     LikesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
 })
 export class MiniWallAppModule {}
