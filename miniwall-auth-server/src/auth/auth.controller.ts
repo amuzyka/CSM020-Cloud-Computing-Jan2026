@@ -7,6 +7,11 @@ import { RegisterDto } from './dto/register.dto';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Post('login')
+  async login(@Body() loginData: { username: string; password: string }) {
+    return this.authService.signIn(loginData);
+  }
+
   @Post('register')
   async register(@Body() userData: RegisterDto) {
     return this.authService.register(userData);

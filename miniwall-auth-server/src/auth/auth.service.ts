@@ -27,6 +27,23 @@ export class AuthService {
     };
   }
 
+  async validateUser(username: string, password: string): Promise<any> {
+    const user = await this.userModel.findOne({ username, isActive: true });
+    if (user && await bcrypt.compare(password, user.password)) {
+      const { password, ...result } = user.toObject();
+      return result;
+    }
+    return null;
+  }
+
+  async signIn(loginData: { username: string; password: string }) {
+    const user = await this.validateUser(loginData.username, loginData.password);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    return this.login(user);
+  }
+
   async register(userData: {
     username: string;
     email: string;
@@ -40,7 +57,13 @@ export class AuthService {
       throw new UnauthorizedException('User already exists');
     }
 
-    const user = new this.userModel(userData);
+    // Hash password before saving
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+    
+    const user = new this.userModel({
+      ...userData,
+      password: hashedPassword
+    });
     await user.save();
 
     const { password, ...result } = user.toObject();
