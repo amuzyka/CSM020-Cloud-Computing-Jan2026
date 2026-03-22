@@ -14,12 +14,8 @@ export class TokenService {
     try {
       const authServerUrl = this.configService.get<string>('AUTH_SERVER_URL', 'http://localhost:4000');
 
-      // The auth server sets a global prefix `api` (see `miniwall-auth-server/src/main.ts`),
-      // so introspection lives under `/api/oauth/introspect`.
       const authServerBaseUrl = authServerUrl.replace(/\/$/, '');
-      const introspectUrl = authServerBaseUrl.endsWith('/api')
-        ? `${authServerBaseUrl}/oauth/introspect`
-        : `${authServerBaseUrl}/api/oauth/introspect`;
+      const introspectUrl = `${authServerBaseUrl}/oauth/introspect`;
 
       const response = await firstValueFrom(
         this.httpService.post<any>(

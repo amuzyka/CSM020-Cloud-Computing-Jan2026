@@ -14,9 +14,6 @@ async function bootstrap() {
   // Global validation pipe
   app.useGlobalPipes(new ValidationPipe());
   
-  // Set prefix
-  app.setGlobalPrefix('api');
-  
   const port = process.env.PORT || 4000;
   await app.listen(port);
   console.log(`OAuth2 Auth Server running on port ${port}`);

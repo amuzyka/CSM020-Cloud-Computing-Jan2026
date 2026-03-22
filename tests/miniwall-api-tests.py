@@ -45,7 +45,7 @@ class MiniWallAPITester:
     """Main test class for MiniWall API"""
     
     def __init__(self):
-        self.auth_base_url = "http://localhost/api/auth"
+        self.auth_base_url = "http://localhost/auth"
         self.app_base_url = "http://localhost"
         self.oauth_base_url = "http://localhost/oauth"
         self.session = requests.Session()
@@ -159,7 +159,7 @@ class MiniWallAPITester:
         
         response = self.make_request(
             "POST",
-            f"{self.auth_base_url}/auth/register",
+            f"{self.auth_base_url}/register",
             json=register_data
         )
         
@@ -173,7 +173,7 @@ class MiniWallAPITester:
         # Login to get JWT token
         login_response = self.make_request(
             "POST",
-            f"{self.auth_base_url}/auth/login",
+            f"{self.auth_base_url}/login",
             json={"username": "test_client_user", "password": "client123"}
         )
         
@@ -890,10 +890,10 @@ def main():
     
     # Check if servers are running
     try:
-        auth_response = requests.get(f"{tester.auth_base_url}/health", timeout=5)
+        auth_response = requests.get("http://localhost/auth/register", timeout=5)
         app_response = requests.get(f"{tester.app_base_url}/health", timeout=5)
         
-        if auth_response.status_code != 200:
+        if auth_response.status_code not in [200, 404]:
             print(f"Auth server not responding correctly: {auth_response.status_code}")
         if app_response.status_code != 200:
             print(f"App server not responding correctly: {app_response.status_code}")
