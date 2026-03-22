@@ -83,7 +83,6 @@ services:
     volumes:
       - mongodb-auth-data:/data/db
       - ./mongo-init-auth.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-      - ./mongo-init-client.js:/docker-entrypoint-initdb.d/mongo-init-client.js:ro
     networks:
       - miniwall-network
     restart: unless-stopped

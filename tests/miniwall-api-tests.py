@@ -268,31 +268,31 @@ class MiniWallAPITester:
         success_count = 0
         
         for user in users:
-            if not user.auth_user_id:
-                # Try to get token using login
-                login_data = {
-                    "username": user.username,
-                    "password": user.password
-                }
-                
-                login_response = self.make_request(
-                    "POST",
-                    f"{self.auth_base_url}/login",
-                    json=login_data
-                )
-                
-                if login_response and login_response.status_code == 201:
-                    auth_data = login_response.json()
-                    user.jwt_token = auth_data.get("access_token")
-                    success_count += 1
-                    self.log_test(f"JWT Auth {user.username}", True, "Successfully obtained JWT token")
-                else:
-                    self.log_test(f"JWT Auth {user.username}", False, 
-                                "Failed to get JWT token", 
-                                login_response.text if login_response else "No response")
-            else:
+            # Always try to get JWT token for users (they may not have one yet)
+            login_data = {
+                "username": user.username,
+                "password": user.password
+            }
+            
+            login_response = self.make_request(
+                "POST",
+                f"{self.auth_base_url}/login",
+                json=login_data
+            )
+            
+            if login_response and login_response.status_code == 201:
+                auth_data = login_response.json()
+                user.jwt_token = auth_data.get("access_token")
+                # Also set the proper user ID from the response
+                user_info = auth_data.get("user", {})
+                user.auth_user_id = user_info.get("id") or user_info.get("_id")
+                user.user_id = user.auth_user_id
                 success_count += 1
-                self.log_test(f"JWT Auth {user.username}", True, "Already has JWT token")
+                self.log_test(f"JWT Auth {user.username}", True, "Successfully obtained JWT token")
+            else:
+                self.log_test(f"JWT Auth {user.username}", False, 
+                            "Failed to get JWT token", 
+                            login_response.text if login_response else "No response")
         
         overall_success = success_count == 3
         self.log_test("TC 2 Overall", overall_success, f"Successfully authenticated {success_count}/3 users")

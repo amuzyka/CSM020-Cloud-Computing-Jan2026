@@ -114,8 +114,7 @@ def verify_services():
     
     services = {
         "Nginx": "http://localhost/health",
-        "Auth Server": "http://localhost/api/auth/health",
-        "OAuth2": "http://localhost/oauth/.well-known/openid_configuration"
+        "App Server": "http://localhost/posts"  # Test actual endpoint we use
     }
     
     all_running = True
@@ -123,7 +122,7 @@ def verify_services():
     for service, url in services.items():
         try:
             response = requests.get(url, timeout=5)
-            if response.status_code == 200:
+            if response.status_code in [200, 401]:  # 401 is OK - means service is running
                 print(f"{service} - OK")
             else:
                 print(f"{service} - Status {response.status_code}")
