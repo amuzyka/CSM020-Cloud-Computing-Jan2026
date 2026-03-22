@@ -13,8 +13,6 @@ import {
 import { ClientService } from '../services/client.service';
 import { CreateClientDto } from '../dto/create-client.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { ApiKeyGuard } from '../guards/api-key.guard';
-import { ClientDocument } from '../schemas/client.schema';
 
 @Controller('clients')
 export class ClientController {
@@ -63,7 +61,7 @@ export class ClientController {
   }
 
   @Get(':id/validate')
-  @UseGuards(ApiKeyGuard) // Allow API key authentication for validation
+  @UseGuards(JwtAuthGuard) // Use JWT authentication instead
   @HttpCode(HttpStatus.OK)
   async validateClient(
     @Param('id') id: string,

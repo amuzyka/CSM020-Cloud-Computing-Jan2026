@@ -1,8 +1,8 @@
-import { Controller, Post, Body, Query, Get, Res } from '@nestjs/common';
+import { Controller, Post, Body, Query, Get, Res, UseGuards } from '@nestjs/common';
 import { type Response } from 'express';
 import { OAuth2Service } from './oauth2.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { UseGuards } from '@nestjs/common';
+import { ClientCredentialsGuard } from './guards/client-credentials.guard';
 
 @Controller('oauth')
 export class OAuth2Controller {
@@ -38,6 +38,7 @@ export class OAuth2Controller {
   }
 
   @Post('token')
+  @UseGuards(ClientCredentialsGuard)
   async token(@Body() body: {
     grant_type: string;
     client_id: string;
@@ -64,28 +65,16 @@ export class OAuth2Controller {
   }
 
   @Post('introspect')
+  @UseGuards(ClientCredentialsGuard)
   async introspect(@Body() body: { token: string }) {
     return this.oauth2Service.introspect(body.token);
   }
 
   @Post('revoke')
+  @UseGuards(ClientCredentialsGuard)
   async revoke(@Body() body: { token: string }) {
     return this.oauth2Service.revoke(body.token);
   }
 
-  //TODO: remove this endpoint in production
-  //decide if to use openid-configuration or not
-  @Get('.well-known/openid_configuration')
-  async openidConfiguration() {
-    return {
-      issuer: 'http://localhost:4000',
-      authorization_endpoint: 'http://localhost:4000/oauth/authorize',
-      token_endpoint: 'http://localhost:4000/oauth/token',
-      introspection_endpoint: 'http://localhost:4000/oauth/introspect',
-      revocation_endpoint: 'http://localhost:4000/oauth/revoke',
-      response_types_supported: ['code', 'token'],
-      grant_types_supported: ['authorization_code', 'refresh_token', 'client_credentials'],
-      scopes_supported: ['read', 'write'],
-    };
-  }
+
 }

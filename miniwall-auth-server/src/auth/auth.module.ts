@@ -11,7 +11,7 @@ import { OAuth2Controller } from './oauth2.controller';
 import { OAuth2Service } from './oauth2.service';
 import { ClientService } from './services/client.service';
 import { ClientController } from './controllers/client.controller';
-import { ApiKeyGuard } from './guards/api-key.guard';
+import { ClientCredentialsGuard } from './guards/client-credentials.guard';
 
 @Module({
   imports: [
@@ -29,7 +29,7 @@ import { ApiKeyGuard } from './guards/api-key.guard';
     }),
   ],
   controllers: [AuthController, OAuth2Controller, ClientController],
-  providers: [AuthService, JwtStrategy, OAuth2Service, ClientService, ApiKeyGuard],
+  providers: [AuthService, JwtStrategy, OAuth2Service, ClientService, ClientCredentialsGuard],
   exports: [AuthService, OAuth2Service, ClientService],
 })
 export class AuthModule {}
