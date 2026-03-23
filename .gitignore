@@ -1,7 +1,4 @@
 
-#TODOS: remove readme when project is ready
-README.md 
-
 # Common development files
 .DS_Store
 .vscode/
@@ -34,11 +31,18 @@ tests/miniwall_test_results_*.json
 tests/miniwall_test_report_*.md
 
 # Terraform
+# Terraform
 *.tfstate
 *.tfstate.*
 .terraform/
-!.terraform.lock.hcl
-terraform.tfvars
+.terraform.lock.hcl
+*.tfvars          
+!*.tfvars.example 
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
 
 # GCP
 gcp-key.json
