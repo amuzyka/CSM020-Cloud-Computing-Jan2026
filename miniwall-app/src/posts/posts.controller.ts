@@ -6,6 +6,7 @@ import {
   Delete,
   Param,
   Body,
+  Query,
   HttpCode,
   HttpStatus,
   NotFoundException,
@@ -53,6 +54,53 @@ export class PostsController {
       return await this.postsService.findAll();
     } catch (error) {
       throw new InternalServerErrorException('Failed to fetch posts: ' + error.message);
+    }
+  }
+
+  @Get('search')
+  async search(
+    @Query('q') titleQuery?: string,
+    @Query('authorId') authorId?: string,
+    @Query('startDate') startDateStr?: string,
+    @Query('endDate') endDateStr?: string,
+  ) {
+    try {
+      // Validate authorId format if provided
+      if (authorId && !isValidObjectId(authorId)) {
+        throw new BadRequestException('Invalid author ID format');
+      }
+
+      // Parse dates if provided
+      let startDate: Date | undefined;
+      let endDate: Date | undefined;
+
+      if (startDateStr) {
+        startDate = new Date(startDateStr);
+        if (isNaN(startDate.getTime())) {
+          throw new BadRequestException('Invalid start date format');
+        }
+      }
+
+      if (endDateStr) {
+        endDate = new Date(endDateStr);
+        if (isNaN(endDate.getTime())) {
+          throw new BadRequestException('Invalid end date format');
+        }
+      }
+
+      const posts = await this.postsService.search(
+        titleQuery,
+        authorId,
+        startDate,
+        endDate,
+      );
+
+      return posts || [];
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to search posts: ' + error.message);
     }
   }
 

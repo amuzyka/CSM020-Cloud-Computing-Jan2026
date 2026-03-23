@@ -5,6 +5,9 @@ export class CreatePostDto {
   authorId: string;
 
   @IsString()
+  title: string;
+
+  @IsString()
   content: string;
 
   @IsOptional()

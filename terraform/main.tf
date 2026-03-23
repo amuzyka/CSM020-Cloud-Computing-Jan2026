@@ -133,8 +133,8 @@ LOG_LEVEL=info
 LOG_FILE=/app/logs/app.log
 ENVFILE
 
-    # 8. Start services using modern Compose V2
-    docker compose --env-file .env.production up -d
+    # 8. Start services using modern Compose V2 (rebuild images on code changes)
+    docker compose --env-file .env.production up -d --build
 
     echo "MiniWall deployment complete!"
     echo "Access at: http://${google_compute_address.miniwall_ip.address}"

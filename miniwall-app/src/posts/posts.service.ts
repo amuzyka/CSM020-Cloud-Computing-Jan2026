@@ -66,4 +66,42 @@ export class PostsService {
       .findByIdAndUpdate(postId, { $inc: { commentCount: -1 } }, { new: true })
       .exec();
   }
+
+  async search(
+    titleQuery?: string,
+    authorId?: string,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<Post[]> {
+    const filter: any = { isPublished: true };
+
+    if (titleQuery) {
+      filter.$text = { $search: titleQuery };
+    }
+
+    if (authorId) {
+      filter.authorId = authorId;
+    }
+
+    if (startDate || endDate) {
+      filter.createdAt = {};
+      if (startDate) {
+        filter.createdAt.$gte = startDate;
+      }
+      if (endDate) {
+        filter.createdAt.$lte = endDate;
+      }
+    }
+
+    const query = this.postModel.find(filter);
+
+    // If using text search, sort by relevance score
+    if (titleQuery) {
+      query.sort({ score: { $meta: 'textScore' }, likeCount: -1, createdAt: -1 });
+    } else {
+      query.sort({ likeCount: -1, createdAt: -1 });
+    }
+
+    return query.exec();
+  }
 }

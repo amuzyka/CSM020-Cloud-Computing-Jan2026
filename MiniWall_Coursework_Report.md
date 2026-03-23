@@ -2,7 +2,9 @@
 
 ## Executive Summary
 
-This report documents the development of MiniWall, a microservices-based social media API designed for cloud deployment. The system implements a dual authentication architecture combining OAuth2 and JWT tokens, with separate services for authentication and resource management. A comprehensive test suite of 15 test cases validates all API functionality including user registration, authentication, content creation, social interactions, and security enforcement. All test cases pass successfully, demonstrating a robust and fully functional API with proper error handling for edge cases such as duplicate registrations, unauthorized access, and self-like prevention.
+This report documents the development of MiniWall, a microservices-based social media API designed for cloud deployment. The system implements imp
+
+a dual authentication architecture combining OAuth2 and JWT tokens, with separate services for authentication and resource management. A comprehensive test suite of 15 test cases validates all API functionality including user registration, authentication, content creation, social interactions, and security enforcement. All test cases pass successfully, demonstrating a robust and fully functional API with proper error handling for edge cases such as duplicate registrations, unauthorized access, and self-like prevention.
 
 ## 1. System Architecture
 
@@ -87,9 +89,96 @@ The database design prioritizes referential integrity through application-level 
 
 ### 1.5 Dockerized Environment Configuration
 
-#### Environment Separation
+MiniWall uses Docker and Docker Compose to containerise and orchestrate the microservices architecture. Containerisation ensures consistent deployment across environments, eliminates "works on my machine" issues, and provides process-level isolation for each service.
 
-MiniWall uses Docker Compose to orchestrate the microservices architecture. The system maintains two separate environment configurations:
+#### Container Architecture
+
+Each service runs in its own container based on lightweight Alpine Linux images:
+
+**Node.js Application Containers**
+- **Base Image**: `node:25-alpine` - Minimal footprint with Node.js 25
+- **Security**: Runs as non-root `nestjs` user (UID 1001) following security best practices
+- **Port Exposure**: Application server exposes port 3000, auth server exposes port 4000
+- **Development Only**: Port 9229 exposed for Node.js debugger attachment
+
+**MongoDB Containers**
+- **Base Image**: `mongo:8.0` - Official MongoDB 8.0 release
+- **Data Persistence**: Named volumes for database storage survive container restarts
+- **Authentication**: SCRAM-SHA-256 authentication enabled with admin credentials
+
+**Nginx Reverse Proxy Container**
+- **Base Image**: `nginx:alpine` - Minimal web server image
+- **Port Mapping**: Exposes ports 80 (HTTP) and 443 (HTTPS) to host
+- **Configuration**: Read-only volume mount for nginx configuration files
+
+#### Dockerfile Strategy
+
+The system employs different Dockerfile strategies for development and production:
+
+**Production Dockerfile (Multi-Stage Build)**
+
+```dockerfile
+# Build stage
+FROM node:25-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Production stage
+FROM node:25-alpine AS production
+WORKDIR /app
+ENV NODE_ENV=production
+RUN npm ci --only=production
+COPY --from=builder /app/dist ./dist
+USER nestjs
+EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD curl -f http://localhost:3000/health || exit 1
+```
+
+This multi-stage approach:
+- **Reduces image size** by excluding build dependencies from final image
+- **Improves security** by running as non-root user
+- **Enables health monitoring** via built-in healthcheck probes
+- **Separates concerns** between build environment and runtime
+
+**Development Dockerfile**
+- Single-stage build with all dependencies
+- Volume-mounted source code for hot-reload
+- Debug port 9229 exposed for IDE debugging
+- `npm run start:dev` command enables file watching
+
+#### Docker Compose Orchestration
+
+Docker Compose coordinates multi-container deployment through declarative YAML configuration:
+
+**Service Dependencies**
+```yaml
+depends_on:
+  - mongodb-app
+  - miniwall-auth-server
+```
+
+This ensures startup order: databases initialise first, then application servers, finally Nginx.
+
+**Networking**
+- **Bridge Network**: All services connect to `miniwall-network` (isolated from host network)
+- **Service Discovery**: Containers communicate via service names (e.g., `http://miniwall-auth-server:4000`)
+- **Internal Only**: Application servers and databases have no external port mappings, accessible only through Nginx
+
+**Volume Management**
+- **Named Volumes**: Persistent storage for databases (`mongodb-app-dev-data`, `mongodb-auth-dev-data`)
+- **Bind Mounts**: Source code directories mounted for development hot-reload
+- **Anonymous Volumes**: `node_modules` volumes prevent host/node_modules conflicts
+
+**Environment Configuration**
+- Environment variables injected via `environment:` directives
+- External env files (`.env.development`, `.env.production`) for sensitive data
+- Variable substitution with defaults: `${JWT_SECRET:-default-value}`
+
+#### Environment Separation
 
 **Development Environment (`docker-compose.dev.yml`)**
 - Uses development Dockerfiles (`Dockerfile.dev`) with hot-reload capability via `npm run start:dev`
@@ -124,6 +213,19 @@ For this coursework, the development environment (`docker-compose.dev.yml`) was 
 - Provides isolated MongoDB instances with separate data volumes
 - Uses a shared Docker network (`miniwall-network`) for inter-service communication
 - Exposes all services through Nginx on localhost port 80
+
+To start the development environment:
+
+```bash
+docker-compose -f docker-compose.dev.yml up -d
+```
+
+This command:
+1. Builds images from Dockerfiles if they don't exist
+2. Creates the `miniwall-network` bridge network
+3. Starts containers in dependency order
+4. Mounts volumes and binds ports
+5. Runs containers in detached mode (`-d`)
 
 
 ## 2. API Endpoints and Functionality
@@ -169,6 +271,18 @@ Retrieves all posts in the system, populating author information from user refer
 
 **GET /posts/:id**
 Retrieves a specific post by ID, including author information. Returns 404 Not Found if the post does not exist.
+
+**GET /posts/search**
+Searches posts by title keyword, author, or date range. Supports the following query parameters:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `q` | string | Title keyword search (uses MongoDB text index) |
+| `authorId` | string | Filter by post author ID |
+| `startDate` | ISO 8601 | Filter posts created on or after this date |
+| `endDate` | ISO 8601 | Filter posts created on or before this date |
+
+Results are sorted by relevance (for text search), then by like count and recency. Multiple parameters can be combined for refined searches.
 
 **POST /comments**
 Creates a comment on a post. Requires postId and content in the request body. The system automatically prevents circular references in comment chains through application-level validation. Returns the created comment with author information.
@@ -284,6 +398,7 @@ The system's modular design enables independent scaling and maintenance of compo
 | /posts | GET | OAuth2 | List all posts |
 | /posts | POST | OAuth2 | Create new post |
 | /posts/:id | GET | OAuth2 | Get specific post |
+| /posts/search | GET | OAuth2 | Search posts by title, author, date |
 | /comments | POST | OAuth2 | Create comment |
 | /comments/post/:id | GET | OAuth2 | Get post comments |
 | /likes | POST | OAuth2 | Create like |
@@ -298,3 +413,129 @@ The system's modular design enables independent scaling and maintenance of compo
 | JWT_SECRET | dev-secret | From env | Token signing |
 | AUTH_SERVER_URL | http://miniwall-auth-server:4000 | http://miniwall-auth-server:4000 | Auth service URL |
 | MONGODB_URI | With auth | Basic | Database connection |
+
+## Appendix C: Search API Examples
+
+The following examples demonstrate the search functionality available via the `/posts/search` endpoint:
+
+### Search by Title Keyword
+
+```
+GET /posts/search?q=cloud
+```
+
+Searches for posts with titles containing the keyword "cloud" using MongoDB's text search index.
+
+### Search by Author and Date Range
+
+```
+GET /posts/search?authorId=65a1b2...&startDate=2024-01-01
+```
+
+Retrieves posts by a specific author created on or after January 1, 2024.
+
+### Combined Search with Multiple Parameters
+
+```
+GET /posts/search?q=miniwall&startDate=2024-01-01&endDate=2024-12-31
+```
+
+Searches for posts with titles containing "miniwall" created within the year 2024.
+
+### Database Index Design
+
+The search functionality is supported by the following MongoDB indexes defined in the Post schema:
+
+- **Text index on title**: `PostSchema.index({ title: 'text' })` - Enables efficient full-text search on post titles
+- **Compound index on authorId and createdAt**: `PostSchema.index({ authorId: 1, createdAt: -1 })` - Optimises author-based queries with date filtering
+- **Index on createdAt**: `PostSchema.index({ createdAt: -1 })` - Supports date range queries
+
+## Appendix D: API User Journey with curl
+
+The following curl commands demonstrate the complete user journey against the deployed MiniWall API at `http://35.208.186.197/`.
+
+### 1. User Registration
+
+```bash
+curl -X POST http://35.208.186.197/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "password123"
+  }'
+```
+
+### 2. User Login (JWT Token Acquisition)
+
+```bash
+curl -X POST http://35.208.186.197/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "password123"
+  }'
+```
+
+Response includes `access_token` and `refresh_token`.
+
+### 3. OAuth2 Token Acquisition
+
+```bash
+curl -X POST http://35.208.186.197/oauth/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=client_credentials" \
+  -d "client_id=miniwall-client" \
+  -d "client_secret=miniwall-client-secret"
+```
+
+Response includes OAuth2 `access_token` for resource access.
+
+### 4. Create a Post
+
+```bash
+curl -X POST http://35.208.186.197/posts \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <oauth2_access_token>" \
+  -d '{
+    "title": "My First Post",
+    "content": "This is the content of my post"
+  }'
+```
+
+### 5. Get All Posts
+
+```bash
+curl -X GET http://35.208.186.197/posts \
+  -H "Authorization: Bearer <oauth2_access_token>"
+```
+
+### 6. Search Posts
+
+```bash
+curl -X GET "http://35.208.186.197/posts/search?q=cloud" \
+  -H "Authorization: Bearer <oauth2_access_token>"
+```
+
+### 7. Create a Comment
+
+```bash
+curl -X POST http://35.208.186.197/comments \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <oauth2_access_token>" \
+  -d '{
+    "postId": "<post_id>",
+    "content": "Great post!"
+  }'
+```
+
+### 8. Like a Post
+
+```bash
+curl -X POST http://35.208.186.197/likes \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <oauth2_access_token>" \
+  -d '{
+    "postId": "<post_id>"
+  }'
+```

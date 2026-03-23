@@ -8,6 +8,9 @@ export class Post {
   @Prop({ required: true })
   authorId: string;
 
+  @Prop({ required: true, maxlength: 200 })
+  title: string;
+
   @Prop({ required: true, maxlength: 2000 })
   content: string;
 
@@ -35,3 +38,5 @@ export const PostSchema = SchemaFactory.createForClass(Post);
 // Indexes
 PostSchema.index({ authorId: 1 });
 PostSchema.index({ createdAt: -1 });
+PostSchema.index({ title: 'text' });
+PostSchema.index({ authorId: 1, createdAt: -1 });
