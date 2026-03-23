@@ -13,10 +13,6 @@ provider "google" {
   zone    = var.gcp_zone
 }
 
-resource "google_project_service" "compute_api" {
-  service            = "compute.googleapis.com"
-  disable_on_destroy = false
-}
 
 resource "google_compute_firewall" "miniwall_firewall" {
   name    = "miniwall-firewall"
