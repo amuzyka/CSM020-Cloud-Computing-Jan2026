@@ -2,14 +2,14 @@
 
 A microservices-based social media API built with NestJS, MongoDB, and Docker. Features dual authentication (JWT + OAuth2) and automated deployment to Google Cloud Platform.
 
-## 🏗️ Architecture
+## Architecture
 
 - **MiniWall App** (Port 3000): Posts, comments, likes API
 - **MiniWall Auth Server** (Port 4000): JWT/OAuth2 authentication
 - **MongoDB**: Two instances (app + auth databases)
 - **Nginx**: Reverse proxy and load balancing
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Docker & Docker Compose
@@ -31,7 +31,7 @@ docker-compose -f docker-compose.dev.yml up -d
 # - Auth Server: http://localhost:4000
 ```
 
-## 🧪 Testing
+## Testing
 
 ### Run Test Suite
 
@@ -65,7 +65,7 @@ curl http://localhost/posts \
   -H "Authorization: Bearer YOUR_OAUTH2_TOKEN"
 ```
 
-## 🌐 Production Deployment
+## Production Deployment
 
 ### Prerequisites
 - GCP Project with billing enabled
@@ -102,7 +102,7 @@ Access your application at the IP shown in GitHub Actions logs:
 - **Auth**: `http://[SERVER_IP]/auth/*`
 - **OAuth**: `http://[SERVER_IP]/oauth/*`
 
-## 🛠️ Manual Terraform Deployment
+## Manual Terraform Deployment
 
 ```bash
 cd terraform
@@ -116,7 +116,7 @@ terraform init
 terraform apply
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ├── miniwall-app/              # Main application API
@@ -132,7 +132,7 @@ terraform apply
     └── deploy.yml              # GitHub Actions workflow
 ```
 
-## 🔐 Security
+## Security
 
 - JWT tokens with configurable expiration
 - OAuth2 client credentials flow
@@ -141,7 +141,7 @@ terraform apply
 - Secrets managed via GitHub Actions (never committed to repo)
 
 
-## 📝 API Documentation
+## API Documentation
 
 See [MiniWall_Coursework_Report.md](MiniWall_Coursework_Report.md) for detailed API endpoint documentation.
 
