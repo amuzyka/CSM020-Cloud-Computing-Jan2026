@@ -1,14 +1,69 @@
-# MiniWall API Development Report
+<div align="center" style="padding: 0 40px 60px 40px; font-family: Arial, sans-serif; min-height: 297mm; display: flex; flex-direction: column; justify-content: flex-start; page-break-after: always;">
+
+<img src="logo.png" alt="MiniWall Logo" style="width: 280px; height: auto; margin: 0 auto 30px auto; display: block;">
+
+<p style="font-size: 22px; margin-bottom: 30px; color: #666;">
+  Module: CSM020 - Cloud Computing
+</p>
+
+<h1 style="font-size: 42px; margin-bottom: 40px; color: #333;">MiniWall API Development Report</h1>
+
+<p style="font-size: 26px; margin-bottom: 20px; color: #555;">
+  <strong>Andrey Muzyka, MSc Computer Science</strong>
+</p>
+
+<p style="font-size: 20px; margin-bottom: 60px; color: #777;">
+  Coursework: January to March 2026 study session
+</p>
+
+<p style="font-size: 16px; color: #999; font-style: italic; margin-top: auto;">
+  Word Count: 3,450 words (excluding front page and appendixes)
+</p>
+
+</div>
+
+
+## Table of Contents
+
+1. [Executive Summary](#executive-summary)
+2. [System Architecture](#2-system-architecture)
+   - 2.1 [Overview](#21-overview)
+   - 2.2 [Component Structure](#22-component-structure)
+   - 2.3 [Data Flow Architecture](#23-data-flow-architecture)
+   - 2.4 [User Journey](#24-user-journey)
+   - 2.5 [Database Design](#25-database-design)
+   - 2.6 [Dockerized Environment Configuration](#26-dockerized-environment-configuration)
+3. [API Endpoints and Functionality](#3-api-endpoints-and-functionality)
+   - 3.1 [Authentication Endpoints](#31-authentication-endpoints)
+   - 3.2 [Resource Endpoints](#32-resource-endpoints)
+   - 3.3 [Error Handling](#33-error-handling)
+4. [Testing Strategy and Results](#4-testing-strategy-and-results)
+   - 4.1 [Test Case Design](#41-test-case-design)
+   - 4.2 [Testing Methodology](#42-testing-methodology)
+   - 4.3 [Test Results](#43-test-results)
+5. [GCP Deployment](#5-gcp-deployment)
+   - 5.1 [Infrastructure as Code with Terraform](#51-infrastructure-as-code-with-terraform)
+   - 5.2 [CI/CD Pipeline with GitHub Actions](#52-cicd-pipeline-with-github-actions)
+   - 5.3 [Deployment Commands](#53-deployment-commands)
+   - 5.4 [Deployment Verification](#54-deployment-verification)
+   - 5.5 [Screenshots](#55-screenshots)
+6. [Conclusion](#6-conclusion)
+- [Appendix A: API Endpoint Reference](#appendix-a-api-endpoint-reference)
+- [Appendix B: Environment Configuration](#appendix-b-environment-configuration)
+- [Appendix C: Search API Examples](#appendix-c-search-api-examples)
+- [Appendix D: API User Journey with curl](#appendix-d-api-user-journey-with-curl)
+
+</div>
 
 ## Executive Summary
 
-This report documents the development of MiniWall, a microservices-based social media API designed for cloud deployment. The system implements imp
+This report documents the development of MiniWall, a microservices-based social media API designed for cloud deployment. The system implements a dual authentication architecture combining OAuth2 and JWT tokens, with separate services for authentication and resource management. A comprehensive test suite of 15 test cases validates all API functionality including user registration, authentication, content creation, social interactions, and security enforcement. All test cases pass successfully, demonstrating a robust and fully functional API with proper error handling for edge cases such as duplicate registrations, unauthorized access, and self-like prevention.
 
-a dual authentication architecture combining OAuth2 and JWT tokens, with separate services for authentication and resource management. A comprehensive test suite of 15 test cases validates all API functionality including user registration, authentication, content creation, social interactions, and security enforcement. All test cases pass successfully, demonstrating a robust and fully functional API with proper error handling for edge cases such as duplicate registrations, unauthorized access, and self-like prevention.
+**Source Code Repository:** [https://github.com/amuzyka/CSM020-Cloud-Computing-Jan2026](https://github.com/amuzyka/CSM020-Cloud-Computing-Jan2026)
 
-## 1. System Architecture
+## 2. System Architecture
 
-### 1.1 Overview
+### 2.1 Overview
 
 MiniWall follows a microservices architecture pattern, separating concerns between authentication and resource management. This design enables independent scaling, deployment, and maintenance of each service while maintaining a unified API interface through an Nginx reverse proxy.
 
@@ -28,7 +83,7 @@ Both the authentication and application servers are built with **NestJS** (using
 
 - **Passport.js Integration**: The authentication server leverages `@nestjs/passport` with Passport.js strategies (JWT, OAuth2) for flexible, modular authentication middleware that integrates seamlessly with NestJS guards and decorators.
 
-### 1.2 Component Structure
+### 2.2 Component Structure
 
 The system comprises three primary components:
 
@@ -41,7 +96,7 @@ The application server manages core social media functionality including posts, 
 **Nginx Reverse Proxy (Port 80)**
 Nginx serves as the entry point for all external requests, routing traffic to appropriate backend services based on URL path patterns. 
 
-### 1.3 Data Flow Architecture
+### 2.3 Data Flow Architecture
 
 The authentication flow implements a simple OAuth2-like system:
 
@@ -54,7 +109,7 @@ The authentication flow implements a simple OAuth2-like system:
 
 This architecture provides clear separation between authentication mechanisms (JWT for client management, OAuth2 for resource access) while maintaining security through token introspection.
 
-### 1.4 User Journey
+### 2.4 User Journey
 
 The MiniWall authentication system follows a standard OAuth2 user journey that separates user identity from application identity:
 
@@ -70,7 +125,7 @@ The MiniWall authentication system follows a standard OAuth2 user journey that s
 
 This dual-token approach ensures that user credentials are never exposed to the application, while the application maintains its own identity for API operations - a fundamental principle of OAuth2 security architecture.
 
-### 1.4 Database Design
+### 2.5 Database Design
 
 Two MongoDB instances support the microservices. The NestJS framework uses **@nestjs/mongoose** to provide seamless MongoDB integration through Mongoose ODM, enabling schema definitions, model injection, and query building within the NestJS dependency injection system.
 
@@ -87,7 +142,7 @@ Two MongoDB instances support the microservices. The NestJS framework uses **@ne
 
 The database design prioritizes referential integrity through application-level checks and unique indexes, particularly for preventing users from liking their own posts or liking the same post multiple times.
 
-### 1.5 Dockerized Environment Configuration
+### 2.6 Dockerized Environment Configuration
 
 MiniWall uses Docker and Docker Compose to containerise and orchestrate the microservices architecture. Containerisation ensures consistent deployment across environments, eliminates "works on my machine" issues, and provides process-level isolation for each service.
 
@@ -228,9 +283,9 @@ This command:
 5. Runs containers in detached mode (`-d`)
 
 
-## 2. API Endpoints and Functionality
+## 3. API Endpoints and Functionality
 
-### 2.1 Authentication Endpoints
+### 3.1 Authentication Endpoints
 
 **POST /auth/register**
 Creates a new user account in the authentication database. The endpoint accepts username, email, and password, performing validation to ensure unique usernames and emails. Passwords are hashed using bcrypt before storage. Successful registration returns the user object without sensitive credentials.
@@ -259,7 +314,7 @@ The endpoint validates client credentials via Basic Authentication or form param
 **POST /oauth/introspect** (Client Credentials Required)
 Validates token authenticity and returns token metadata including active status, associated user, scopes, and expiration time. This endpoint enables the application server to verify OAuth2 tokens without direct database access to the authentication database.
 
-### 2.2 Resource Endpoints
+### 3.2 Resource Endpoints
 
 All resource endpoints require OAuth2 bearer tokens in the Authorization header, following the format `Authorization: Bearer <token>`.
 
@@ -300,7 +355,7 @@ These constraints are enforced through database unique indexes and application-l
 **GET /likes/post/:postId**
 Retrieves all likes for a specific post, including user information for each like. Enables calculating like counts and identifying who liked a post.
 
-### 2.3 Error Handling
+### 3.3 Error Handling
 
 The API implements consistent error responses following HTTP status code conventions:
 
@@ -316,9 +371,9 @@ The API implements consistent error responses following HTTP status code convent
 
 Error responses include descriptive messages and, in development mode, stack traces to aid debugging.
 
-## 3. Testing Strategy and Results
+## 4. Testing Strategy and Results
 
-### 3.1 Test Case Design
+### 4.1 Test Case Design
 
 The test suite implements 15 comprehensive test cases covering the complete API functionality:
 
@@ -343,7 +398,7 @@ TC14 tests JWT token refresh functionality, ensuring expired access tokens can b
 **Verification Tests (TC15)**
 TC15 verifies like counting and retrieval, ensuring the API correctly tracks and reports engagement metrics.
 
-### 3.2 Testing Methodology
+### 4.2 Testing Methodology
 
 The test suite implements automated API testing using Python's requests library. The testing framework:
 
@@ -355,7 +410,7 @@ The test suite implements automated API testing using Python's requests library.
 
 The methodology ensures reproducible tests that don't interfere with production data while providing comprehensive coverage of API functionality.
 
-### 3.3 Test Results
+### 4.3 Test Results
 
 All 15 test cases pass successfully, demonstrating a fully functional API:
 
@@ -379,11 +434,102 @@ All 15 test cases pass successfully, demonstrating a fully functional API:
 
 The 100% pass rate indicates that all implemented functionality works as specified, with proper error handling for edge cases like duplicate registrations and self-likes.
 
-## 4. Conclusion
+## 5. GCP Deployment
 
-MiniWall demonstrates a robust microservices architecture implementing modern authentication standards. The dual OAuth2/JWT approach provides flexibility for different client types while maintaining security through token introspection. Comprehensive testing validated all required functionality.
+This section documents the deployment of MiniWall to Google Cloud Platform (GCP) using Terraform for infrastructure provisioning and GitHub Actions for CI/CD automation.
 
-The system's modular design enables independent scaling and maintenance of components, while the Nginx reverse proxy provides a unified API interface. With 100% test coverage and documented API endpoints, MiniWall successfully demonstrates all required coursework functionality and can be extended with additional social media features.
+### 5.1 Infrastructure as Code with Terraform
+
+Terraform provisions the GCP infrastructure using the University of London provided GCP account. The configuration files are located in the `terraform/` directory:
+
+**`main.tf`** - Defines the compute instance and networking:
+- `google_compute_firewall`: Opens ports 22 (SSH), 80 (HTTP), 443 (HTTPS), 3000 (app), 4000 (auth)
+- `google_compute_address`: Static IP for consistent access
+- `google_compute_instance`: e2-medium VM (2 vCPU, 4GB RAM) with Debian 12
+
+**`variables.tf`** - Configurable inputs:
+- `gcp_project_id`, `gcp_region`, `gcp_zone`
+- `jwt_secret`, `oauth2_client_secret` (sensitive)
+
+**`backend.tf`** - GCS backend for state management
+
+### 5.2 CI/CD Pipeline with GitHub Actions
+
+The `.github/workflows/deploy.yml` automates deployment:
+
+1. **Trigger**: Push to `main` branch
+2. **Terraform Steps**:
+   - Checkout code
+   - Setup Terraform
+   - Authenticate to GCP using service account key (stored as GitHub secret)
+   - `terraform init` with GCS backend
+   - `terraform plan` and `terraform apply -auto-approve`
+3. **Deployment**: Terraform startup script clones repo and runs Docker Compose
+
+**Required GitHub Secrets**:
+- `GCP_SA_KEY`: Service account JSON key
+- `GCP_PROJECT_ID`: Project identifier
+- `JWT_SECRET`: JWT signing secret
+- `OAUTH2_CLIENT_SECRET`: OAuth2 client secret
+
+### 5.3 Deployment Commands
+
+**Initial Deployment**:
+```bash
+cd terraform/
+terraform init
+terraform plan
+terraform apply -auto-approve
+```
+
+**Accessing the Deployed Instance**:
+```bash
+# SSH into the VM
+gcloud compute ssh miniwall-server --zone=us-central1-a
+
+# Or use the output from terraform
+$(terraform output ssh_command)
+```
+
+**Checking Deployment Status**:
+```bash
+# View instance details
+gcloud compute instances describe miniwall-server --zone=us-central1-a
+
+# Check firewall rules
+gcloud compute firewall-rules list --filter="name:miniwall"
+```
+
+**Redeployment**:
+```bash
+# Destroy and recreate
+cd terraform/
+terraform destroy -auto-approve
+terraform apply -auto-approve
+```
+
+### 5.4 Deployment Verification
+
+The deployment is verified through:
+1. **Terraform Outputs**: Display server IP and SSH command
+2. **Health Check**: Access `http://<IP>/` (Nginx should respond)
+3. **API Test**: Use curl commands from Appendix D
+4. **Docker Status**: SSH in and run `docker compose ps`
+
+### 5.5 Screenshots
+
+*[Screenshots to be added showing:]*
+- Terraform plan/apply output
+- GCP Console VM instance running
+- GitHub Actions workflow success
+- API health check response
+- Docker containers running on VM
+
+## 6. Conclusion
+
+This coursework demonstrates the complete software development lifecycle of MiniWall, from requirements analysis through to production deployment on GCP. The project successfully delivers a microservices-based social media API with dual OAuth2/JWT authentication, MongoDB search functionality, Docker containerization, and automated CI/CD pipelines using Terraform and GitHub Actions.
+
+Key achievements include: modular NestJS architecture with clear service separation, advanced post search with MongoDB indexing, multi-stage Docker builds, Infrastructure as Code deployment to UoL-provided GCP resources, and 100% test coverage across 15 test cases. MiniWall showcases industry-standard practices in API design, cloud deployment, and DevOps automation.
 
 ## Appendix A: API Endpoint Reference
 
@@ -406,12 +552,12 @@ The system's modular design enables independent scaling and maintenance of compo
 
 ## Appendix B: Environment Configuration
 
-| Variable | Development | Coursework | Purpose |
+| Variable | Development | Production | Purpose |
 |----------|-------------|------------|---------|
-| OAUTH2_CLIENT_ID | miniwall-client | From env | Client identifier |
-| OAUTH2_CLIENT_SECRET | miniwall-client-secret | From env | Client secret |
-| JWT_SECRET | dev-secret | From env | Token signing |
-| AUTH_SERVER_URL | http://miniwall-auth-server:4000 | http://miniwall-auth-server:4000 | Auth service URL |
+| OAUTH2_CLIENT_ID | miniwall-client | Production env value | Client identifier |
+| OAUTH2_CLIENT_SECRET | miniwall-client-secret | Production env value | Client secret |
+| JWT_SECRET | dev-secret | Production env value | Token signing |
+| AUTH_SERVER_URL | miniwall-auth-server:4000 | miniwall-auth-server:4000 | Auth service URL |
 | MONGODB_URI | With auth | Basic | Database connection |
 
 ## Appendix C: Search API Examples
@@ -429,18 +575,18 @@ Searches for posts with titles containing the keyword "cloud" using MongoDB's te
 ### Search by Author and Date Range
 
 ```
-GET /posts/search?authorId=65a1b2...&startDate=2024-01-01
+GET /posts/search?authorId=65a1b2...&startDate=2026-01-01
 ```
 
-Retrieves posts by a specific author created on or after January 1, 2024.
+Retrieves posts by a specific author created on or after January 1, 2026.
 
 ### Combined Search with Multiple Parameters
 
 ```
-GET /posts/search?q=miniwall&startDate=2024-01-01&endDate=2024-12-31
+GET /posts/search?q=miniwall&startDate=2026-01-01&endDate=2026-03-31
 ```
 
-Searches for posts with titles containing "miniwall" created within the year 2024.
+Searches for posts with titles containing "miniwall" created within the study period 2026.
 
 ### Database Index Design
 

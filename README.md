@@ -142,7 +142,7 @@ terraform apply
 
 ## API Documentation
 
-See [MiniWall_Coursework_Report.md](MiniWall_Coursework_Report.md) for detailed API endpoint documentation.
+See [report/MiniWall_Coursework_Report.md](report/MiniWall_Coursework_Report.md) for detailed API endpoint documentation.
 
 
 
