@@ -1,0 +1,80 @@
+name: Deploy MiniWall 
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  TF_VAR_gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
+  TF_VAR_gcp_region: us-central1
+  TF_VAR_gcp_zone: us-central1-a
+  TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
+  TF_VAR_oauth2_client_id: ${{ secrets.OAUTH2_CLIENT_ID }}
+  TF_VAR_oauth2_client_secret: ${{ secrets.OAUTH2_CLIENT_SECRET }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to GCP
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Setup GCP CLI
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.7.0"
+
+    - name: Terraform Init
+      working-directory: ./terraform
+      run: terraform init
+
+    - name: Terraform Plan
+      working-directory: ./terraform
+      run: terraform plan -out=tfplan
+
+    - name: Terraform Apply
+      working-directory: ./terraform
+      run: terraform apply -auto-approve tfplan
+
+    - name: Get deployment outputs
+      id: outputs
+      working-directory: ./terraform
+      run: |
+        echo "server_ip=$(terraform output -raw server_ip)" >> $GITHUB_OUTPUT
+        echo "deployment_url=$(terraform output -raw deployment_url)" >> $GITHUB_OUTPUT
+
+    - name: Wait for services to start
+      run: |
+        echo "⏳ Waiting for MiniWall services to start..."
+        sleep 60
+        
+        DEPLOYMENT_URL="${{ steps.outputs.outputs.deployment_url }}"
+        
+        # Test if server is responding
+        for i in {1..10}; do
+          if curl -sf "$DEPLOYMENT_URL/health" || curl -sf "$DEPLOYMENT_URL/posts"; then
+            echo "MiniWall is ready!"
+            break
+          else
+            echo "⏳ Waiting for services... (attempt $i/10)"
+            sleep 30
+          fi
+        done
+
+    - name: Summary
+      run: |
+        echo "MiniWall deployed successfully!"
+        echo "Server IP: ${{ steps.outputs.outputs.server_ip }}"
+        echo "Application URL: ${{ steps.outputs.outputs.deployment_url }}"

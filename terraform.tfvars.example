@@ -1,0 +1,10 @@
+# Terraform Variables Template
+# Copy this file to terraform.tfvars and update with your actual values
+
+gcp_project_id = "your-gcp-project-id"
+gcp_region      = "us-central1"
+gcp_zone         = "us-central1-a"
+github_repo      = "your-username/miniwall"
+jwt_secret       = "your-super-secret-jwt-key-change-in-production"
+oauth2_client_id     = "miniwall-client"
+oauth2_client_secret = "your-super-secret-client-key-change-in-production"
