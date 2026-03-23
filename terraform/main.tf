@@ -7,42 +7,6 @@ terraform {
   }
 }
 
-# Variables
-variable "gcp_project_id" {
-  description = "GCP Project ID"
-  type        = string
-}
-
-variable "gcp_region" {
-  description = "GCP Region"
-  type        = string
-  default     = "us-central1"
-}
-
-variable "gcp_zone" {
-  description = "GCP Zone"
-  type        = string
-  default     = "us-central1-a"
-}
-
-variable "jwt_secret" {
-  description = "JWT Secret"
-  type        = string
-  sensitive   = true
-}
-
-variable "oauth2_client_id" {
-  description = "OAuth2 Client ID"
-  type        = string
-  sensitive   = true
-}
-
-variable "oauth2_client_secret" {
-  description = "OAuth2 Client Secret"
-  type        = string
-  sensitive   = true
-}
-
 provider "google" {
   project = var.gcp_project_id
   region  = var.gcp_region
@@ -186,15 +150,4 @@ ENVFILE
     google_compute_firewall.miniwall_firewall,
     google_compute_address.miniwall_ip
   ]
-}
-
-# Outputs
-output "instance_ip" {
-  description = "Public IP address of the MiniWall server"
-  value       = google_compute_address.miniwall_ip.address
-}
-
-output "ssh_command" {
-  description = "SSH command to connect"
-  value       = "gcloud compute ssh miniwall-server --zone=${var.gcp_zone} --project=${var.gcp_project_id}"
 }
