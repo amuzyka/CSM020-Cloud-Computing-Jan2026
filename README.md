@@ -27,8 +27,7 @@ cd CSM020-Cloud-Computing-Jan2026
 docker-compose -f docker-compose.dev.yml up -d
 
 # Access services
-# - API: http://localhost
-# - Auth Server: http://localhost:4000
+#  http://localhost
 ```
 
 ## Testing
