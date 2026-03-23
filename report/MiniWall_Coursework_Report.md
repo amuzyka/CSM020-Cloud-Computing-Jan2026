@@ -17,7 +17,7 @@
 </p>
 
 <p style="font-size: 16px; color: #999; font-style: italic; margin-top: auto;">
-  Word Count: 3,450 words (excluding front page and appendixes)
+  Word Count: 2,983 words (excluding front page, table of contents, appendixes, and tables)
 </p>
 
 </div>
