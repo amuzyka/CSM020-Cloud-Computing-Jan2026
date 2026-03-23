@@ -13,7 +13,6 @@ provider "google" {
   zone    = var.gcp_zone
 }
 
-
 resource "google_compute_firewall" "miniwall_firewall" {
   name    = "miniwall-firewall"
   network = "default"
@@ -26,7 +25,6 @@ resource "google_compute_firewall" "miniwall_firewall" {
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["miniwall", "http-server"]
   
-  depends_on = [google_project_service.compute_api]
 }
 
 # Static IP address
