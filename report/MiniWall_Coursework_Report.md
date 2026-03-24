@@ -471,6 +471,8 @@ The `.github/workflows/deploy.yml` automates deployment:
 - `GCP_PROJECT_ID`: Project identifier
 - `JWT_SECRET`: JWT signing secret
 - `OAUTH2_CLIENT_SECRET`: OAuth2 client secret
+- `MONGO_APP_PASSWORD`: MongoDB app database password
+- `MONGO_AUTH_PASSWORD`: MongoDB auth database password
 
 ### 5.3 Deployment Commands
 

@@ -38,3 +38,15 @@ variable "oauth2_client_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "mongo_app_root_password" {
+  description = "MongoDB App Database Root Password"
+  type        = string
+  sensitive   = true
+}
+
+variable "mongo_auth_root_password" {
+  description = "MongoDB Auth Database Root Password"
+  type        = string
+  sensitive   = true
+}

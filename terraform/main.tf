@@ -99,9 +99,9 @@ resource "google_compute_instance" "miniwall_server" {
 # MongoDB Configuration
 # ============================================
 MONGO_APP_ROOT_USERNAME=admin
-MONGO_APP_ROOT_PASSWORD=admin123
+MONGO_APP_ROOT_PASSWORD=${var.mongo_app_root_password}
 MONGO_AUTH_ROOT_USERNAME=admin
-MONGO_AUTH_ROOT_PASSWORD=admin123
+MONGO_AUTH_ROOT_PASSWORD=${var.mongo_auth_root_password}
 
 # ============================================
 # Server Configuration
