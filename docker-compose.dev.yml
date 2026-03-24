@@ -6,6 +6,8 @@ services:
       context: ./miniwall-app
       dockerfile: Dockerfile.dev
     container_name: miniwall-app-dev
+    ports:
+      - "9229:9229"
     env_file:
       - .env.development
     environment:
@@ -17,7 +19,6 @@ services:
       - /app/node_modules  
       - miniwall-app-dev-data:/app/data
       - miniwall-dev-logs:/app/logs
-    command: npm run start:dev
     depends_on:
       - mongodb-app
       - miniwall-auth-server
@@ -31,6 +32,8 @@ services:
       context: ./miniwall-auth-server
       dockerfile: Dockerfile.dev
     container_name: miniwall-auth-server-dev
+    ports:
+      - "9230:9230"
     env_file:
       - .env.development
     environment:
@@ -43,7 +46,6 @@ services:
       - /app/node_modules  
       - miniwall-auth-dev-data:/app/data
       - miniwall-dev-logs:/app/logs
-    command: npm run start:dev
     depends_on:
       - mongodb-auth
     networks:

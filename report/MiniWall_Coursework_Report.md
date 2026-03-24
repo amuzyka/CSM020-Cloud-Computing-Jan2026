@@ -635,7 +635,8 @@ curl -X POST http://35.208.186.197/posts \
   -H "Authorization: Bearer <jwt_access_token>" \
   -d '{
     "title": "My First Post",
-    "content": "This is the content of my post"
+    "content": "This is the content of my post",
+    "authorId": "<user_id>"
   }'
 ```
 
@@ -661,6 +662,7 @@ curl -X POST http://35.208.186.197/comments \
   -H "Authorization: Bearer <jwt_access_token>" \
   -d '{
     "postId": "<post_id>",
+    "authorId": "<user_id>",
     "content": "Great post!"
   }'
 ```
@@ -672,6 +674,7 @@ curl -X POST http://35.208.186.197/likes \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <jwt_access_token>" \
   -d '{
-    "postId": "<post_id>"
+    "postId": "<post_id>",
+    "userId": "<user_id>"
   }'
 ```

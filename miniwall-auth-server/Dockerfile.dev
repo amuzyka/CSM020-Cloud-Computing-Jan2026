@@ -11,8 +11,8 @@ RUN addgroup -g 1001 -S nodejs && \
     chown -R nestjs:nodejs /app
 USER nestjs
 
-# Expose port
-EXPOSE 4000
+# Expose ports
+EXPOSE 4000 9230
 
 # Start the application in development mode
-CMD ["npm", "run", "start:dev"]
+CMD ["npm", "run", "start:debug", "--", "--debug", "0.0.0.0:9230"]
