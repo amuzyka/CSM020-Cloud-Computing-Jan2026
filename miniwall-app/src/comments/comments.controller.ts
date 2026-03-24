@@ -13,6 +13,7 @@ import {
   InternalServerErrorException,
   ConflictException,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -27,9 +28,17 @@ export class CommentsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createCommentDto: CreateCommentDto) {
+  async create(@Body() createCommentDto: CreateCommentDto, @Request() req: any) {
     try {
-      return await this.commentsService.create(createCommentDto);
+      // Extract authorId from the introspected token
+      const authorId = req.oauth2?.sub || req.oauth2?.username;
+      if (!authorId) {
+        throw new BadRequestException('Unable to determine author from token');
+      }
+      
+      // Add authorId to the comment data
+      const commentData = { ...createCommentDto, authorId };
+      return await this.commentsService.create(commentData);
     } catch (error) {
       // Handle MongoDB duplicate key error
       if (error.code === 11000) {

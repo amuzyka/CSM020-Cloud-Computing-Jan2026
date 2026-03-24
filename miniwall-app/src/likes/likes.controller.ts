@@ -13,6 +13,7 @@ import {
   ConflictException,
   ForbiddenException,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { LikesService } from './likes.service';
 import { CreateLikeDto } from './dto/create-like.dto';
@@ -26,9 +27,17 @@ export class LikesController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)  
-  async create(@Body() createLikeDto: CreateLikeDto) {
+  async create(@Body() createLikeDto: CreateLikeDto, @Request() req: any) {
     try {
-      return await this.likesService.create(createLikeDto);
+      // Extract userId from the introspected token
+      const userId = req.oauth2?.sub || req.oauth2?.username;
+      if (!userId) {
+        throw new BadRequestException('Unable to determine user from token');
+      }
+      
+      // Add userId to the like data
+      const likeData = { ...createLikeDto, userId };
+      return await this.likesService.create(likeData);
     } catch (error) {
       // Handle MongoDB duplicate key error (unique constraint violation)
       if (error.code === 11000) {
