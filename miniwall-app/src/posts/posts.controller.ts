@@ -14,6 +14,7 @@ import {
   InternalServerErrorException,
   ConflictException,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -28,9 +29,17 @@ export class PostsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createPostDto: CreatePostDto) {
+  async create(@Body() createPostDto: CreatePostDto, @Request() req: any) {
     try {
-      return await this.postsService.create(createPostDto);
+      // Extract authorId from the introspected token
+      const authorId = req.oauth2?.sub || req.oauth2?.username;
+      if (!authorId) {
+        throw new BadRequestException('Unable to determine author from token');
+      }
+      
+      // Add authorId to the post data
+      const postData = { ...createPostDto, authorId };
+      return await this.postsService.create(postData);
     } catch (error) {
       // Handle MongoDB duplicate key error
       if (error.code === 11000) {
