@@ -145,6 +145,9 @@ ENVFILE
 
       echo "MiniWall deployment complete!"
     EOF
+    
+    # Update trigger: Forces script re-execution on each deployment
+    update-trigger = "${timestamp()}"
   }
 
   depends_on = [
