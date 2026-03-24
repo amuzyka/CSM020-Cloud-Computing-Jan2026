@@ -24,7 +24,6 @@ resource "google_compute_firewall" "miniwall_firewall" {
 
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["miniwall", "http-server"]
-  
 }
 
 # Static IP address
@@ -56,45 +55,53 @@ resource "google_compute_instance" "miniwall_server" {
     }
   }
 
-  metadata_startup_script = <<-EOF
-    #!/bin/bash
-    set -e
+  # USE METADATA MAP: This prevents Terraform from destroying the VM on every script change.
+  # Changes here will show as "~ update in-place" in your Terraform plan.
+  metadata = {
+    startup-script = <<-EOF
+      #!/bin/bash
+      set -e
 
-    echo "Starting MiniWall deployment with Modern Docker Stack..."
+      echo "Starting MiniWall deployment with Modern Docker Stack..."
 
-    # 1. Install Prerequisites
-    apt-get update
-    apt-get install -y ca-certificates curl gnupg git
+      # 1. Install Prerequisites
+      apt-get update
+      apt-get install -y ca-certificates curl gnupg git
 
-    # 2. Add Docker's Official GPG Key
-    install -m 0755 -d /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-    chmod a+r /etc/apt/keyrings/docker.gpg
+      # 2. Add Docker's Official GPG Key
+      install -m 0755 -d /etc/apt/keyrings
+      curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+      chmod a+r /etc/apt/keyrings/docker.gpg
 
-    # 3. Add Docker Repository (Debian 12)
-    echo \
-      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
-      $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-      tee /etc/apt/sources.list.d/docker.list > /dev/null
+      # 3. Add Docker Repository (Debian 12)
+      echo \
+        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+        $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+        tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-    # 4. Install Docker Engine and Compose Plugin (V2)
-    apt-get update
-    apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      # 4. Install Docker Engine and Compose Plugin (V2)
+      apt-get update
+      apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-    # 5. Start Docker
-    systemctl start docker
-    systemctl enable docker
+      # 5. Start Docker
+      systemctl start docker
+      systemctl enable docker
 
-    # 6. Prepare Application Directory
-    mkdir -p /opt/miniwall
-    cd /opt/miniwall
-    
-    # Clone repository
-    rm -rf ./*
-    git clone https://github.com/amuzyka/CSM020-Cloud-Computing-Jan2026.git .
+      # 6. Prepare Application Directory
+      mkdir -p /opt/miniwall
+      cd /opt/miniwall
+      
+      # Smart Git: Update if exists, clone if not
+      if [ -d ".git" ]; then
+        echo "Repository exists. Pulling latest changes..."
+        git pull origin main
+      else
+        echo "Cloning repository..."
+        git clone https://github.com/amuzyka/CSM020-Cloud-Computing-Jan2026.git .
+      fi
 
-    # 7. Create production environment file
-    cat > .env.production << 'ENVFILE'
+      # 7. Create production environment file
+      cat > .env.production << 'ENVFILE'
 # ============================================
 # MongoDB Configuration
 # ============================================
@@ -133,12 +140,12 @@ LOG_LEVEL=info
 LOG_FILE=/app/logs/app.log
 ENVFILE
 
-    # 8. Start services using modern Compose V2 (rebuild images on code changes)
-    docker compose --env-file .env.production up -d --build
+      # 8. Start services (rebuild on code changes)
+      docker compose --env-file .env.production up -d --build
 
-    echo "MiniWall deployment complete!"
-    echo "Access at: http://${google_compute_address.miniwall_ip.address}"
-  EOF
+      echo "MiniWall deployment complete!"
+    EOF
+  }
 
   depends_on = [
     google_compute_firewall.miniwall_firewall,
