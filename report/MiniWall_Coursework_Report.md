@@ -620,69 +620,57 @@ curl -X POST http://35.208.186.197/auth/register \
 curl -X POST http://35.208.186.197/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "test@example.com",
+    "username": "testuser",
     "password": "password123"
   }'
 ```
 
 Response includes `access_token` and `refresh_token`.
 
-### 3. OAuth2 Token Acquisition
-
-```bash
-curl -X POST http://35.208.186.197/oauth/token \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "grant_type=client_credentials" \
-  -d "client_id=miniwall-client" \
-  -d "client_secret=miniwall-client-secret"
-```
-
-Response includes OAuth2 `access_token` for resource access.
-
-### 4. Create a Post
+### 3. Create a Post
 
 ```bash
 curl -X POST http://35.208.186.197/posts \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <oauth2_access_token>" \
+  -H "Authorization: Bearer <jwt_access_token>" \
   -d '{
     "title": "My First Post",
     "content": "This is the content of my post"
   }'
 ```
 
-### 5. Get All Posts
+### 4. Get All Posts
 
 ```bash
 curl -X GET http://35.208.186.197/posts \
-  -H "Authorization: Bearer <oauth2_access_token>"
+  -H "Authorization: Bearer <jwt_access_token>"
 ```
 
-### 6. Search Posts
+### 5. Search Posts
 
 ```bash
 curl -X GET "http://35.208.186.197/posts/search?q=cloud" \
-  -H "Authorization: Bearer <oauth2_access_token>"
+  -H "Authorization: Bearer <jwt_access_token>"
 ```
 
-### 7. Create a Comment
+### 6. Create a Comment
 
 ```bash
 curl -X POST http://35.208.186.197/comments \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <oauth2_access_token>" \
+  -H "Authorization: Bearer <jwt_access_token>" \
   -d '{
     "postId": "<post_id>",
     "content": "Great post!"
   }'
 ```
 
-### 8. Like a Post
+### 7. Like a Post
 
 ```bash
 curl -X POST http://35.208.186.197/likes \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <oauth2_access_token>" \
+  -H "Authorization: Bearer <jwt_access_token>" \
   -d '{
     "postId": "<post_id>"
   }'

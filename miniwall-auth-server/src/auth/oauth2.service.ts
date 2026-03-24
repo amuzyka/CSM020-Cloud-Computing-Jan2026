@@ -97,19 +97,38 @@ export class OAuth2Service {
   async introspect(token: string) {
     try {
       const payload = this.jwtService.verify(token);
-      
-      // Validate client still exists and is active
-      const client = await this.clientService.findByClientId(payload.client_id);
-      
-      return {
-        active: true,
-        scope: payload.scopes?.join(' ') || 'read',
-        client_id: payload.client_id,
-        username: payload.username || null,
-        exp: payload.exp,
-        iat: payload.iat,
-        token_type: 'Bearer',
-      };
+
+      // Handle user JWT tokens (from /auth/login)
+      if (payload.username && payload.sub) {
+        return {
+          active: true,
+          scope: payload.roles?.join(' ') || 'read',
+          username: payload.username,
+          sub: payload.sub,
+          exp: payload.exp,
+          iat: payload.iat,
+          token_type: 'Bearer',
+        };
+      }
+
+      // Handle OAuth2 client tokens (from /oauth/token)
+      if (payload.client_id) {
+        const client = await this.clientService.findByClientId(payload.client_id);
+        if (!client) {
+          return { active: false };
+        }
+        return {
+          active: true,
+          scope: payload.scopes?.join(' ') || 'read',
+          client_id: payload.client_id,
+          username: payload.username || null,
+          exp: payload.exp,
+          iat: payload.iat,
+          token_type: 'Bearer',
+        };
+      }
+
+      return { active: false };
     } catch (error) {
       return { active: false };
     }
