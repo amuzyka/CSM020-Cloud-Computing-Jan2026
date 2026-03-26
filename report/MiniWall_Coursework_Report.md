@@ -391,20 +391,17 @@ TC1 verifies user registration functionality, ensuring the system can create new
 **Security Tests (TC3)**
 TC3 verifies that unauthorized requests are properly rejected. The test attempts to access protected endpoints without authentication, expecting 401 Unauthorized responses. This validates the OAuth2ResourceGuard implementation across all resource endpoints.
 
-**OAuth2 Flow Tests (TC4-TC5)**
-TC4 tests OAuth2 client registration, ensuring authenticated users can create client applications. TC5 verifies the OAuth2 token acquisition flow, testing that client credentials can be exchanged for access tokens.
+**Content Creation Tests (TC4-TC6)**
+TC4, TC5, and TC6 verify post creation functionality for Olga, Nick, and Mary respectively, ensuring the system correctly associates posts with their authors and validates required fields (title, content).
 
-**Content Creation Tests (TC6-TC8, TC10)**
-TC6 and TC7 verify post creation functionality for multiple users, ensuring the system correctly associates posts with their authors. TC8 tests post retrieval, validating that the API returns all created posts with proper author information. TC10 tests additional content creation for subsequent interaction tests.
+**Content Retrieval Tests (TC7, TC10)**
+TC7 tests post browsing in reverse chronological order, ensuring users can view all posts sorted by creation date. TC10 verifies Mary can browse posts, testing user-specific access to content.
 
-**Social Interaction Tests (TC9, TC11-TC13)**
-TC9 tests comment functionality, ensuring users can comment on others' posts. TC11 verifies comment retrieval. TC12 tests the like functionality with valid users, ensuring multiple users can like the same post. TC13 is a negative test case verifying that self-likes are properly rejected with 403 Forbidden responses.
+**Social Interaction Tests (TC8-TC9, TC11-TC13)**
+TC8 tests round-robin commenting where Nick and Olga comment on Mary's post. TC9 is a negative test verifying Mary cannot comment on her own post (400 error). TC11 verifies Mary can view comments on her posts. TC12 tests multiple users liking Mary's post. TC13 is a negative test verifying Mary cannot like her own post (403 error).
 
-**Token Management Tests (TC14)**
-TC14 tests JWT token refresh functionality, ensuring expired access tokens can be renewed using refresh tokens without requiring re-authentication.
-
-**Verification Tests (TC15)**
-TC15 verifies like counting and retrieval, ensuring the API correctly tracks and reports engagement metrics.
+**Engagement Verification Tests (TC14-TC15)**
+TC14 verifies Mary can see likes on her posts, ensuring proper like counting and retrieval. TC15 tests that posts with more likes appear first in the feed, validating the like-based sorting algorithm.
 
 ### 4.2 Testing Methodology
 
@@ -427,18 +424,18 @@ All 15 test cases pass successfully, demonstrating a fully functional API:
 | TC1 | User Registration (Olga, Nick, Mary) | PASS |
 | TC2 | JWT Authentication | PASS |
 | TC3 | Unauthorized Access Prevention | PASS |
-| TC4 | OAuth2 Client Registration | PASS |
-| TC5 | OAuth2 Token Acquisition | PASS |
-| TC6 | Post Creation (Olga) | PASS |
-| TC7 | Post Creation (Nick) | PASS |
-| TC8 | Get All Posts | PASS |
-| TC9 | Comment Creation | PASS |
-| TC10 | Post Creation (Mary) | PASS |
-| TC11 | Get Post Comments | PASS |
-| TC12 | Multiple Users Like Post | PASS |
-| TC13 | Self-Like Prevention | PASS |
-| TC14 | Token Refresh | PASS |
-| TC15 | Get Post Likes | PASS |
+| TC4 | Post Creation (Olga) | PASS |
+| TC5 | Post Creation (Nick) | PASS |
+| TC6 | Post Creation (Mary) | PASS |
+| TC7 | Browse Posts (Reverse Chronological) | PASS |
+| TC8 | Round-Robin Comments on Mary's Post | PASS |
+| TC9 | Mary Comments Own Post (Should Fail) | PASS |
+| TC10 | Mary Browse Posts | PASS |
+| TC11 | Mary See Comments on Her Posts | PASS |
+| TC12 | Nick and Olga Like Mary's Post | PASS |
+| TC13 | Mary Likes Own Post (Should Fail) | PASS |
+| TC14 | Mary See Likes on Her Posts | PASS |
+| TC15 | Nick See Posts (Liked Posts First) | PASS |
 
 The 100% pass rate indicates that all implemented functionality works as specified, with proper error handling for edge cases like duplicate registrations and self-likes.
 
