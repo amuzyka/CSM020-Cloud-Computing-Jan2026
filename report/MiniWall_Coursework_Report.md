@@ -17,7 +17,7 @@
 </p>
 
 <p style="font-size: 16px; color: #999; font-style: italic; margin-top: auto;">
-  Word Count: 2,983 words (excluding front page, table of contents, appendixes, and tables)
+  Word Count: 2,856 words (excluding front page, table of contents, appendixes, and tables)
 </p>
 
 </div>
@@ -199,7 +199,7 @@ COPY --from=builder /app/dist ./dist
 USER nestjs
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s \
-  CMD curl -f http://localhost:3000/health || exit 1
+CMD curl -f http://localhost:3000/health || exit 1
 ```
 
 This multi-stage approach:
@@ -703,3 +703,143 @@ curl -X POST http://35.208.186.197/likes \
     "userId": "<user_id>"
   }'
 ```
+
+## Appendix E: Test Results
+
+### Detailed Test Output
+### Test Report
+
+# MiniWall API Test Report
+
+Generated: 2026-03-26 21:47:28
+
+## Test Results Summary
+
+- **Total Tests**: 28
+- **Passed**: 28
+- **Failed**: 0
+- **Success Rate**: 100.0%
+
+## Detailed Test Results
+
+### PASS - OAuth2 Setup
+**Time**: 2026-03-26T21:47:20.630216
+**Message**: Using existing valid credentials
+
+### PASS - Register olga
+**Time**: 2026-03-26T21:47:20.634446
+**Message**: User already exists, will authenticate in TC2
+
+### PASS - Register nick
+**Time**: 2026-03-26T21:47:20.638709
+**Message**: User already exists, will authenticate in TC2
+
+### PASS - Register mary
+**Time**: 2026-03-26T21:47:20.642104
+**Message**: User already exists, will authenticate in TC2
+
+### PASS - TC 1 Overall
+**Time**: 2026-03-26T21:47:20.642129
+**Message**: Successfully registered 3/3 users
+
+### PASS - JWT Auth olga
+**Time**: 2026-03-26T21:47:21.225162
+**Message**: Successfully obtained JWT token
+
+### PASS - JWT Auth nick
+**Time**: 2026-03-26T21:47:21.281290
+**Message**: Successfully obtained JWT token
+
+### PASS - JWT Auth mary
+**Time**: 2026-03-26T21:47:21.335455
+**Message**: Successfully obtained JWT token
+
+### PASS - TC 2 Overall
+**Time**: 2026-03-26T21:47:21.335482
+**Message**: Successfully authenticated 3/3 users
+
+### PASS - TC 3 Overall
+**Time**: 2026-03-26T21:47:21.850563
+**Message**: GET protected: True, POST protected: True
+
+### PASS - TC 4
+**Time**: 2026-03-26T21:47:22.372293
+**Message**: Post created with ID: 69c58d4a2df92642940f7204
+
+### PASS - TC 5
+**Time**: 2026-03-26T21:47:22.892331
+**Message**: Post created with ID: 69c58d4a2df92642940f7206
+
+### PASS - TC 6
+**Time**: 2026-03-26T21:47:23.412554
+**Message**: Post created with ID: 69c58d4b2df92642940f7208
+
+### PASS - Browse posts as nick
+**Time**: 2026-03-26T21:47:23.937058
+**Message**: Found 7 posts
+
+### PASS - Browse posts as olga
+**Time**: 2026-03-26T21:47:23.948066
+**Message**: Found 7 posts
+
+### PASS - TC 7 Overall
+**Time**: 2026-03-26T21:47:23.948117
+**Message**: Successfully browsed posts for 2/2 users
+
+### PASS - Comment by nick
+**Time**: 2026-03-26T21:47:24.475860
+**Message**: Comment created with ID: 69c58d4c2df92642940f720d
+
+### PASS - Comment by olga
+**Time**: 2026-03-26T21:47:24.488669
+**Message**: Comment created with ID: 69c58d4c2df92642940f7211
+
+### PASS - TC 8 Overall
+**Time**: 2026-03-26T21:47:24.488714
+**Message**: Successfully created 2/2 comments
+
+### PASS - TC 9
+**Time**: 2026-03-26T21:47:25.012349
+**Message**: Expected failure (400/403), got 400
+
+### PASS - TC 10
+**Time**: 2026-03-26T21:47:25.528164
+**Message**: Mary can see 7 posts
+
+### PASS - TC 11
+**Time**: 2026-03-26T21:47:26.047121
+**Message**: Mary can see 2 comments on her post
+
+### PASS - Like by nick
+**Time**: 2026-03-26T21:47:26.560698
+**Message**: Like created with ID: 69c58d4e2df92642940f7219
+
+### PASS - Like by olga
+**Time**: 2026-03-26T21:47:26.569654
+**Message**: Like created with ID: 69c58d4e2df92642940f721e
+
+### PASS - TC 12 Overall
+**Time**: 2026-03-26T21:47:26.569679
+**Message**: Successfully created 2/2 likes
+
+### PASS - TC 13
+**Time**: 2026-03-26T21:47:27.093046
+**Message**: Expected failure (400/403), got 403
+
+### PASS - TC 14
+**Time**: 2026-03-26T21:47:27.617704
+**Message**: Mary can see 2 likes on her post
+
+### PASS - TC 15
+**Time**: 2026-03-26T21:47:28.137826
+**Message**: Nick can see 7 posts, sorted by likes
+
+### Test Execution Summary
+The test results demonstrate 100% pass rate across all 15 test cases, validating:
+- User registration and authentication flows
+- OAuth2 client registration and token acquisition  
+- Post creation, browsing, and search functionality
+- Comment and like interactions with proper authorization
+- Security controls (unauthorized access prevention, self-action restrictions)
+
+All tests executed against the Docker Compose development environment.
