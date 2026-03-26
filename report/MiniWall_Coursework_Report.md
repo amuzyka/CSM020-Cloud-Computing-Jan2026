@@ -140,8 +140,9 @@ Two MongoDB instances support the microservices. The NestJS framework uses **@ne
 **Auth Database (`miniwall-auth`)**
 - `users`: Stores username, email, password hashes, and profile information
 - `clients`: OAuth2 client registrations with client_id, client_secret, redirect URIs, and grant types
-- `tokens`: Refresh tokens for JWT renewal
-- `codes`: Authorization codes for OAuth2 flow
+- `tokenblacklists`: Revoked token tracking for JWT token invalidation
+
+**Note**: Refresh tokens and authorization codes are implemented as stateless JWT tokens rather than database-stored entities, following modern OAuth2 best practices.
 
 **App Database (`miniwall`)**
 - `posts`: Content with author references, titles, and timestamps
