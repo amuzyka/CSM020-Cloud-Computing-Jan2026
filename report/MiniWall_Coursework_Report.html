@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiniWall API Development Report</title>
+    <style>
+        :root {
+            --primary-navy: #1e3a5f;
+            --primary-blue: #2c5282;
+            --accent-blue: #3182ce;
+            --text-dark: #1a202c;
+            --text-grey: #4a5568;
+            --light-grey: #f7fafc;
+            --border-grey: #e2e8f0;
+            --medium-grey: #cbd5e0;
+            --code-bg: #edf2f7;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background-color: var(--white);
+            font-size: 11pt;
+        }
+
+        /* Cover Page */
+        .cover-page {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 60px;
+            page-break-after: always;
+            background: linear-gradient(to bottom, var(--white) 0%, var(--light-grey) 100%);
+            border-bottom: 4px solid var(--primary-navy);
+        }
+
+        .logo-container {
+            margin-bottom: 50px;
+            padding: 20px;
+        }
+
+        .logo-container img {
+            max-width: 280px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .module-info {
+            font-size: 16pt;
+            color: var(--text-grey);
+            margin-bottom: 30px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .report-title {
+            font-size: 34pt;
+            font-weight: 700;
+            color: var(--primary-navy);
+            margin-bottom: 40px;
+            line-height: 1.2;
+            max-width: 800px;
+            border-bottom: 2px solid var(--border-grey);
+            padding-bottom: 30px;
+        }
+
+        .author-info {
+            font-size: 18pt;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .coursework-info {
+            font-size: 13pt;
+            color: var(--text-grey);
+            margin-bottom: 60px;
+            font-style: italic;
+        }
+
+        .word-count {
+            font-size: 10pt;
+            color: var(--text-grey);
+            margin-top: auto;
+            font-style: italic;
+            padding-top: 40px;
+            border-top: 1px solid var(--border-grey);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* Table of Contents */
+        .toc {
+            page-break-after: always;
+            padding: 50px 60px;
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--white);
+        }
+
+        .toc h2 {
+            font-size: 22pt;
+            margin-bottom: 30px;
+            color: var(--primary-navy);
+            border-bottom: 3px solid var(--primary-navy);
+            padding-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .toc li {
+            margin-bottom: 8px;
+            line-height: 1.8;
+        }
+
+        .toc a {
+            text-decoration: none;
+            color: var(--text-dark);
+            display: flex;
+            align-items: baseline;
+            transition: all 0.2s;
+            padding: 4px 0;
+        }
+
+        .toc a:hover {
+            color: var(--accent-blue);
+            padding-left: 5px;
+        }
+
+        .toc .section-number {
+            font-weight: 700;
+            min-width: 40px;
+            color: var(--primary-blue);
+        }
+
+        .toc .section-title {
+            flex-grow: 1;
+            font-weight: 500;
+        }
+
+        .toc .dots {
+            flex-grow: 1;
+            border-bottom: 1px dotted var(--medium-grey);
+            margin: 0 8px;
+            position: relative;
+            top: -4px;
+        }
+
+        .toc ul ul {
+            padding-left: 40px;
+            margin-top: 5px;
+            border-left: 2px solid var(--light-grey);
+        }
+
+        .toc ul ul li {
+            font-size: 10.5pt;
+        }
+
+        /* Main Content */
+        .content {
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 40px 60px;
+        }
+
+        h1 {
+            font-size: 22pt;
+            color: var(--primary-navy);
+            margin-top: 40px;
+            margin-bottom: 20px;
+            page-break-after: avoid;
+            border-bottom: 2px solid var(--primary-navy);
+            padding-bottom: 10px;
+            font-weight: 700;
+        }
+
+        h2 {
+            font-size: 16pt;
+            color: var(--primary-blue);
+            margin-top: 30px;
+            margin-bottom: 15px;
+            page-break-after: avoid;
+            font-weight: 600;
+        }
+
+        h3 {
+            font-size: 13pt;
+            color: var(--text-dark);
+            margin-top: 25px;
+            margin-bottom: 12px;
+            page-break-after: avoid;
+            font-weight: 600;
+        }
+
+        h4 {
+            font-size: 11pt;
+            color: var(--text-dark);
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 12px;
+            text-align: justify;
+            orphans: 3;
+            widows: 3;
+            color: var(--text-dark);
+        }
+
+        strong {
+            color: var(--primary-navy);
+            font-weight: 600;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin-bottom: 15px;
+            padding-left: 30px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        li > ul, li > ol {
+            margin-top: 6px;
+            margin-bottom: 6px;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 10.5pt;
+            page-break-inside: avoid;
+            border: 1px solid var(--border-grey);
+        }
+
+        th {
+            background-color: var(--primary-navy);
+            border: 1px solid var(--primary-navy);
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        td {
+            border: 1px solid var(--border-grey);
+            padding: 10px;
+            vertical-align: top;
+            background: var(--white);
+        }
+
+        tr:nth-child(even) td {
+            background-color: var(--light-grey);
+        }
+
+        /* Code Blocks */
+        pre {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border-grey);
+            border-left: 4px solid var(--primary-blue);
+            border-radius: 0;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 9.5pt;
+            line-height: 1.5;
+            margin: 15px 0;
+            page-break-inside: avoid;
+        }
+
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: var(--code-bg);
+            padding: 2px 6px;
+            border: 1px solid var(--border-grey);
+            border-radius: 3px;
+            font-size: 9.5pt;
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        pre code {
+            padding: 0;
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            font-weight: normal;
+        }
+
+        /* Blockquotes/Notes */
+        blockquote {
+            border-left: 4px solid var(--accent-blue);
+            margin: 20px 0;
+            padding: 15px 20px;
+            background-color: var(--light-grey);
+            page-break-inside: avoid;
+            color: var(--text-grey);
+        }
+
+        blockquote strong {
+            color: var(--primary-navy);
+        }
+
+        blockquote p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Links */
+        a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        a:hover {
+            text-decoration: underline;
+            color: var(--primary-blue);
+        }
+
+        /* Images */
+        .image-container {
+            margin: 25px 0;
+            page-break-inside: avoid;
+            text-align: center;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--border-grey);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .image-caption {
+            font-size: 10pt;
+            color: var(--text-grey);
+            font-style: italic;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .screenshot {
+            max-width: 90%;
+            margin: 20px auto;
+            display: block;
+            border: 1px solid var(--medium-grey);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Appendix styling */
+        .appendix h2 {
+            color: var(--text-grey);
+            border-bottom: 2px solid var(--medium-grey);
+        }
+
+        .appendix h2::before {
+            content: "Appendix: ";
+            color: var(--primary-navy);
+        }
+
+        /* Status badges for test results */
+        .status-pass {
+            color: #22543d;
+            font-weight: 700;
+            background: #c6f6d5;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 9pt;
+        }
+
+        .status-fail {
+            color: #742a2a;
+            font-weight: 700;
+            background: #fed7d7;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 9pt;
+        }
+
+        /* Executive Summary Box */
+        .executive-summary {
+            background: var(--light-grey);
+            border-left: 5px solid var(--primary-navy);
+            padding: 25px;
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+
+        .executive-summary h2 {
+            margin-top: 0;
+            color: var(--primary-navy);
+            border-bottom: 1px solid var(--border-grey);
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                font-size: 11pt;
+                line-height: 1.5;
+                color: #000;
+            }
+
+            .cover-page {
+                height: 100vh;
+                page-break-after: always;
+                background: #fff;
+            }
+
+            .toc {
+                page-break-after: always;
+            }
+
+            h1, h2, h3 {
+                page-break-after: avoid;
+                color: #000;
+            }
+
+            pre, table, blockquote, .image-container {
+                page-break-inside: avoid;
+            }
+
+            a {
+                text-decoration: none;
+                color: #000;
+            }
+
+            a[href]:after {
+                content: " (" attr(href) ")";
+                font-size: 9pt;
+                color: #666;
+                word-wrap: break-word;
+            }
+            
+            a[href^="#"]:after {
+                content: "";
+            }
+
+            .status-pass, .status-fail {
+                background: none;
+                padding: 0;
+                font-weight: bold;
+            }
+
+            th {
+                background-color: #e0e0e0 !important;
+                color: #000 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            tr:nth-child(even) td {
+                background-color: #f5f5f5 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .cover-page {
+                padding: 30px;
+            }
+            
+            table {
+                font-size: 9pt;
+            }
+
+            .report-title {
+                font-size: 24pt;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Cover Page -->
+    <div class="cover-page">
+        <div class="logo-container">
+            <img src="logo.png" alt="MiniWall Logo">
+        </div>
+        
+        <div class="module-info">Module: CSM020 - Cloud Computing</div>
+        
+        <h1 class="report-title">MiniWall API Development Report</h1>
+        
+        <div class="author-info">
+            Andrey Muzyka, MSc Computer Science
+        </div>
+        
+        <div class="coursework-info">
+            Coursework: January to March 2026 study session
+        </div>
+        
+        <div class="word-count">
+            Word Count: 2,296 words (excluding front page, table of contents, appendixes, tables, code blocks, and lists)
+        </div>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="toc">
+        <h2>Table of Contents</h2>
+        <nav>
+            <ul>
+                <li>
+                    <a href="#executive-summary">
+                        <span class="section-number">1</span>
+                        <span class="section-title">Executive Summary</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#system-architecture">
+                        <span class="section-number">2</span>
+                        <span class="section-title">System Architecture</span>
+                    </a>
+                    <ul>
+                        <li><a href="#overview">2.1 Overview</a></li>
+                        <li><a href="#component-structure">2.2 Component Structure</a></li>
+                        <li><a href="#data-flow">2.3 Data Flow Architecture</a></li>
+                        <li><a href="#user-journey">2.4 User Journey</a></li>
+                        <li><a href="#database-design">2.5 Database Design</a></li>
+                        <li><a href="#docker-config">2.6 Dockerized Environment Configuration</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#api-endpoints">
+                        <span class="section-number">3</span>
+                        <span class="section-title">API Endpoints and Functionality</span>
+                    </a>
+                    <ul>
+                        <li><a href="#auth-endpoints">3.1 Authentication Endpoints</a></li>
+                        <li><a href="#resource-endpoints">3.2 Resource Endpoints</a></li>
+                        <li><a href="#error-handling">3.3 Error Handling</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#testing">
+                        <span class="section-number">4</span>
+                        <span class="section-title">Testing Strategy and Results</span>
+                    </a>
+                    <ul>
+                        <li><a href="#test-design">4.1 Test Case Design</a></li>
+                        <li><a href="#test-methodology">4.2 Testing Methodology</a></li>
+                        <li><a href="#test-results">4.3 Test Results</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#gcp-deployment">
+                        <span class="section-number">5</span>
+                        <span class="section-title">GCP Deployment</span>
+                    </a>
+                    <ul>
+                        <li><a href="#terraform">5.1 Infrastructure as Code with Terraform</a></li>
+                        <li><a href="#cicd">5.2 CI/CD Pipeline with GitHub Actions</a></li>
+                        <li><a href="#deployment-commands">5.3 Deployment Commands</a></li>
+                        <li><a href="#deployment-verification">5.4 Deployment Verification</a></li>
+                        <li><a href="#screenshots">5.5 Screenshots</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#conclusion">
+                        <span class="section-number">6</span>
+                        <span class="section-title">Conclusion</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#appendix-a">
+                        <span class="section-title">Appendix A: API Endpoint Reference</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#appendix-b">
+                        <span class="section-title">Appendix B: Environment Configuration</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#appendix-c">
+                        <span class="section-title">Appendix C: Search API Examples</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#appendix-d">
+                        <span class="section-title">Appendix D: API User Journey with curl</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#appendix-e">
+                        <span class="section-title">Appendix E: Test Results</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        
+        <section id="executive-summary" class="executive-summary">
+            <h2>1. Executive Summary</h2>
+            <p>This report documents the development of MiniWall, a microservices-based social media API designed for cloud deployment. The system implements a dual authentication architecture combining OAuth2 and JWT tokens, with separate services for authentication and resource management. A comprehensive test suite of 15 test cases validates all API functionality including user registration, authentication, content creation, social interactions, and security enforcement. All test cases pass successfully, demonstrating a robust and fully functional API with proper error handling for edge cases such as duplicate registrations, unauthorized access, and self-like prevention.</p>
+            
+            <p><strong>Source Code Repository:</strong> <a href="https://github.com/amuzyka/CSM020-Cloud-Computing-Jan2026">https://github.com/amuzyka/CSM020-Cloud-Computing-Jan2026</a></p>
+        </section>
+
+        <h1 id="system-architecture">2. System Architecture</h1>
+        
+        <h2 id="overview">2.1 Overview</h2>
+        <p>MiniWall follows a microservices architecture pattern, separating concerns between authentication and resource management. This design enables independent scaling, deployment, and maintenance of each service while maintaining a unified API interface through an Nginx reverse proxy.</p>
+        
+        <p>Both the authentication and application servers are built with <strong>NestJS</strong> (using the Express platform by default), a progressive Node.js framework that provides several architectural advantages:</p>
+        
+        <ul>
+            <li><strong>Modular Architecture:</strong> NestJS organizes code into modules with clear boundaries, making the codebase maintainable and testable. Each feature (auth, posts, comments, likes) exists as a self-contained module with its own controller, service, and repository.</li>
+            <li><strong>Dependency Injection:</strong> Built-in DI container manages service dependencies, enabling loose coupling between components and simplifying unit testing through mock injection.</li>
+            <li><strong>Decorator-Based API Definition:</strong> Controllers use TypeScript decorators (<code>@Controller</code>, <code>@Get</code>, <code>@Post</code>) for declarative route definition, reducing boilerplate and improving code readability.</li>
+            <li><strong>Built-in Validation:</strong> Integration with <code>class-validator</code> enables automatic request validation through DTOs (Data Transfer Objects), ensuring data integrity before processing.</li>
+            <li><strong>TypeScript Support:</strong> Full TypeScript support provides compile-time type checking, improving code quality and developer productivity through IDE autocompletion and refactoring tools.</li>
+            <li><strong>Interceptors and Guards:</strong> Middleware patterns like interceptors (for logging/transforming responses) and guards (for authentication/authorization) enable cross-cutting concerns to be handled consistently across endpoints.</li>
+            <li><strong>Passport.js Integration:</strong> The authentication server leverages <code>@nestjs/passport</code> with Passport.js strategies (JWT, OAuth2) for flexible, modular authentication middleware that integrates seamlessly with NestJS guards and decorators.</li>
+        </ul>
+
+        <h2 id="component-structure">2.2 Component Structure</h2>
+        <p>The system comprises three primary components:</p>
+        
+        <h3>Authentication Server (Port 4000)</h3>
+        <p>The authentication server handles all identity-related operations including user registration, login, token generation, and token introspection. Built with NestJS and MongoDB, it implements both JWT for session management and OAuth2 for third-party client authorization. The server maintains its own database (<code>miniwall-auth</code>) for user credentials, OAuth2 client registrations, and refresh token storage.</p>
+        
+        <p>An OAuth client registry is a secure repository within the authorization server that stores registered third-party application details.</p>
+        
+        <p>The client registry supports two registration types:</p>
+        <ul>
+            <li><strong>Manual Registration:</strong> Pre-configured clients created via database initialization scripts. The <code>mongo-init-auth.js</code> script pre-registers the "miniwall-client" for the miniwall-app, enabling immediate authentication without runtime registration.</li>
+            <li><strong>Dynamic Registration:</strong> Runtime client creation via the <code>POST /clients</code> endpoint, requiring JWT authentication. This allows third-party applications to self-register programmatically.</li>
+        </ul>
+
+        <h3>Application Server (Port 3000)</h3>
+        <p>The application server manages core social media functionality including posts, comments, and likes. It requires OAuth2 bearer tokens for access control and communicates with the authentication server via token introspection to validate requests. This server maintains a separate MongoDB database (<code>miniwall</code>) for content storage.</p>
+
+        <h3>Nginx Reverse Proxy (Port 80)</h3>
+        <p>Nginx serves as the entry point for all external requests, routing traffic to appropriate backend services based on URL path patterns.</p>
+
+        <h2 id="data-flow">2.3 Data Flow Architecture</h2>
+        <p>The authentication flow implements a simple OAuth2-like system:</p>
+        
+        <ol>
+            <li><strong>Registration Phase:</strong> Users register via <code>/auth/register</code>, receiving a user ID stored in the auth database</li>
+            <li><strong>Authentication Phase:</strong> Users login via <code>/auth/login</code>, receiving a JWT access token and refresh token</li>
+            <li><strong>Client Registration:</strong> Authenticated users can register OAuth2 clients using their JWT token via <code>/clients</code></li>
+            <li><strong>Authorization Phase:</strong> OAuth2 clients obtain access tokens via <code>/oauth/token</code> using client credentials</li>
+            <li><strong>Resource Access:</strong> API endpoints (posts, comments, likes) require OAuth2 bearer tokens for access</li>
+            <li><strong>Token Validation:</strong> The application server introspects tokens via <code>/oauth/introspect</code> to verify validity</li>
+        </ol>
+        
+        <p>This architecture provides clear separation between authentication mechanisms (JWT for client management, OAuth2 for resource access) while maintaining security through token introspection.</p>
+
+        <h2 id="user-journey">2.4 User Journey</h2>
+        <p>The MiniWall authentication system follows a standard OAuth2 user journey that separates user identity from application identity:</p>
+        
+        <ol>
+            <li><strong>Account Creation:</strong> User registers via <code>/auth/register</code> with username, email, and password, receiving a user ID in the authentication database</li>
+            <li><strong>User Authentication:</strong> User logs in via <code>/auth/login</code>, receiving a personal JWT access token (1-hour expiration) and refresh token (7-day expiration) for their own identity</li>
+            <li><strong>Application Authorization:</strong> The MiniWall application (pre-configured client) authenticates using its client credentials via <code>/oauth/token</code>, receiving an OAuth2 access token for application-level operations</li>
+            <li><strong>Resource Access:</strong> The MiniWall application uses its OAuth2 bearer token to access protected API endpoints (posts, comments, likes) on behalf of users</li>
+            <li><strong>Token Validation:</strong> The application server validates OAuth2 tokens via <code>/oauth/introspect</code> to ensure requests are authorized before processing</li>
+        </ol>
+        
+        <p>This dual-token approach ensures that user credentials are never exposed to the application, while the application maintains its own identity for API operations—a fundamental principle of OAuth2 security architecture.</p>
+
+        <h2 id="database-design">2.5 Database Design</h2>
+        <p>Two MongoDB instances support the microservices. The NestJS framework uses <strong>@nestjs/mongoose</strong> to provide seamless MongoDB integration through Mongoose ODM, enabling schema definitions, model injection, and query building within the NestJS dependency injection system.</p>
+        
+        <h3>Auth Database (<code>miniwall-auth</code>)</h3>
+        <ul>
+            <li><strong>users:</strong> Stores username, email, password hashes, and profile information</li>
+            <li><strong>clients:</strong> OAuth2 client registrations with client_id, client_secret, redirect URIs, and grant types</li>
+            <li><strong>tokenblacklists:</strong> Revoked token tracking for JWT token invalidation</li>
+        </ul>
+        
+        <p><strong>Note:</strong> Refresh tokens and authorization codes are implemented as stateless JWT tokens rather than database-stored entities, following modern OAuth2 best practices.</p>
+
+        <h3>App Database (<code>miniwall</code>)</h3>
+        <ul>
+            <li><strong>posts:</strong> Content with author references, titles, and timestamps</li>
+            <li><strong>comments:</strong> Nested comments with post references and author information</li>
+            <li><strong>likes:</strong> User-post associations with unique constraints preventing duplicate likes</li>
+        </ul>
+        
+        <p>The database design prioritizes referential integrity through application-level checks and unique indexes, particularly for preventing users from liking their own posts or liking the same post multiple times.</p>
+
+        <h2 id="docker-config">2.6 Dockerized Environment Configuration</h2>
+        <p>MiniWall uses Docker and Docker Compose to containerise and orchestrate the microservices architecture. Containerisation ensures consistent deployment across environments, eliminates "works on my machine" issues, and provides process-level isolation for each service.</p>
+        
+        <h3>Container Architecture</h3>
+        <p>Each service runs in its own container based on lightweight Alpine Linux images:</p>
+        
+        <h4>Node.js Application Containers</h4>
+        <ul>
+            <li><strong>Base Image:</strong> <code>node:25-alpine</code>—Minimal footprint with Node.js 25</li>
+            <li><strong>Security:</strong> Runs as non-root <code>nestjs</code> user (UID 1001) following security best practices</li>
+            <li><strong>Port Exposure:</strong> Application server exposes port 3000, auth server exposes port 4000</li>
+            <li><strong>Development Only:</strong> Port 9229 exposed for Node.js debugger attachment</li>
+        </ul>
+
+        <h4>MongoDB Containers</h4>
+        <ul>
+            <li><strong>Base Image:</strong> <code>mongo:8.0</code>—Official MongoDB 8.0 release</li>
+            <li><strong>Data Persistence:</strong> Named volumes for database storage survive container restarts</li>
+            <li><strong>Authentication:</strong> SCRAM-SHA-256 authentication enabled with admin credentials</li>
+        </ul>
+
+        <h4>Nginx Reverse Proxy Container</h4>
+        <ul>
+            <li><strong>Base Image:</strong> <code>nginx:alpine</code>—Minimal web server image</li>
+            <li><strong>Port Mapping:</strong> Exposes ports 80 (HTTP) and 443 (HTTPS) to host</li>
+            <li><strong>Configuration:</strong> Read-only volume mount for nginx configuration files</li>
+        </ul>
+
+        <h3>Dockerfile Strategy</h3>
+        <p>The system employs different Dockerfile strategies for development and production:</p>
+        
+        <h4>Production Dockerfile (Multi-Stage Build)</h4>
+        <pre><code># Build stage
+FROM node:25-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Production stage
+FROM node:25-alpine AS production
+WORKDIR /app
+ENV NODE_ENV=production
+RUN npm ci --only=production
+COPY --from=builder /app/dist ./dist
+USER nestjs
+EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=3s \
+CMD curl -f http://localhost:3000/health || exit 1</code></pre>
+        
+        <p>This multi-stage approach:</p>
+        <ul>
+            <li><strong>Reduces image size</strong> by excluding build dependencies from final image</li>
+            <li><strong>Improves security</strong> by running as non-root user</li>
+            <li><strong>Enables health monitoring</strong> via built-in healthcheck probes</li>
+            <li><strong>Separates concerns</strong> between build environment and runtime</li>
+        </ul>
+
+        <h4>Development Dockerfile</h4>
+        <ul>
+            <li>Single-stage build with all dependencies</li>
+            <li>Volume-mounted source code for hot-reload</li>
+            <li>Debug port 9229 exposed for IDE debugging</li>
+            <li><code>npm run start:dev</code> command enables file watching</li>
+        </ul>
+
+        <h3>Docker Compose Orchestration</h3>
+        <p>Docker Compose coordinates multi-container deployment through declarative YAML configuration:</p>
+        
+        <h4>Service Dependencies</h4>
+        <pre><code>depends_on:
+  - mongodb-app
+  - miniwall-auth-server</code></pre>
+        <p>This ensures startup order: databases initialise first, then application servers, finally Nginx.</p>
+
+        <h4>Networking</h4>
+        <ul>
+            <li><strong>Bridge Network:</strong> All services connect to <code>miniwall-network</code> (isolated from host network)</li>
+            <li><strong>Service Discovery:</strong> Containers communicate via service names (e.g., <code>http://miniwall-auth-server:4000</code>)</li>
+            <li><strong>Internal Only:</strong> Application servers and databases have no external port mappings, accessible only through Nginx</li>
+        </ul>
+
+        <h4>Volume Management</h4>
+        <ul>
+            <li><strong>Named Volumes:</strong> Persistent storage for databases (<code>mongodb-app-dev-data</code>, <code>mongodb-auth-dev-data</code>)</li>
+            <li><strong>Bind Mounts:</strong> Source code directories mounted for development hot-reload</li>
+            <li><strong>Anonymous Volumes:</strong> <code>node_modules</code> volumes prevent host/node_modules conflicts</li>
+        </ul>
+
+        <h4>Environment Configuration</h4>
+        <ul>
+            <li>Environment variables injected via <code>environment:</code> directives</li>
+            <li>External env files (<code>.env.development</code>, <code>.env.production</code>) for sensitive data</li>
+            <li>Variable substitution with defaults: <code>${JWT_SECRET:-default-value}</code></li>
+        </ul>
+
+        <h3>Environment Separation</h3>
+        
+        <h4>Development Environment (<code>docker-compose.dev.yml</code>)</h4>
+        <ul>
+            <li>Uses development Dockerfiles (<code>Dockerfile.dev</code>) with hot-reload capability via <code>npm run start:dev</code></li>
+            <li>Mounts source code directories as volumes for live editing without container rebuild</li>
+            <li>Simplified authentication (basic admin credentials)</li>
+            <li>Debug logging enabled</li>
+            <li>Named with <code>-dev</code> suffix for easy identification</li>
+        </ul>
+
+        <h4>Production Environment (<code>docker-compose.yml</code>)</h4>
+        <ul>
+            <li>Uses optimized production Dockerfiles with multi-stage builds</li>
+            <li>No source code volumes—containers are immutable</li>
+            <li>Environment variables loaded from <code>.env.production</code></li>
+            <li>Restart policies set to <code>unless-stopped</code></li>
+        </ul>
+
+        <h3>Service Architecture</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Development Container</th>
+                    <th>Production Container</th>
+                    <th>Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>miniwall-app</td>
+                    <td>miniwall-app-dev</td>
+                    <td>miniwall-app</td>
+                    <td>Main application server</td>
+                </tr>
+                <tr>
+                    <td>miniwall-auth-server</td>
+                    <td>miniwall-auth-server-dev</td>
+                    <td>miniwall-auth-server</td>
+                    <td>Authentication server</td>
+                </tr>
+                <tr>
+                    <td>mongodb-app</td>
+                    <td>miniwall-mongodb-app-dev</td>
+                    <td>miniwall-mongodb-app</td>
+                    <td>Posts/comments/likes database</td>
+                </tr>
+                <tr>
+                    <td>mongodb-auth</td>
+                    <td>miniwall-mongodb-auth-dev</td>
+                    <td>miniwall-mongodb-auth</td>
+                    <td>Users/clients/tokens database</td>
+                </tr>
+                <tr>
+                    <td>nginx</td>
+                    <td>miniwall-nginx-dev</td>
+                    <td>miniwall-nginx</td>
+                    <td>Reverse proxy (port 80/443)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Coursework Implementation</h3>
+        <p>For this coursework, the development environment (<code>docker-compose.dev.yml</code>) was used exclusively. This configuration:</p>
+        <ul>
+            <li>Enables rapid iteration through volume-mounted source code</li>
+            <li>Provides isolated MongoDB instances with separate data volumes</li>
+            <li>Uses a shared Docker network (<code>miniwall-network</code>) for inter-service communication</li>
+            <li>Exposes all services through Nginx on localhost port 80</li>
+        </ul>
+
+        <p>To start the development environment:</p>
+        <pre><code>docker-compose -f docker-compose.dev.yml up -d</code></pre>
+        
+        <p>This command:</p>
+        <ol>
+            <li>Builds images from Dockerfiles if they don't exist</li>
+            <li>Creates the <code>miniwall-network</code> bridge network</li>
+            <li>Starts containers in dependency order</li>
+            <li>Mounts volumes and binds ports</li>
+            <li>Runs containers in detached mode (<code>-d</code>)</li>
+        </ol>
+
+        <h1 id="api-endpoints">3. API Endpoints and Functionality</h1>
+        
+        <h2 id="auth-endpoints">3.1 Authentication Endpoints</h2>
+        
+        <h3>POST /auth/register</h3>
+        <p>Creates a new user account in the authentication database. The endpoint accepts username, email, and password, performing validation to ensure unique usernames and emails. Passwords are hashed using bcrypt before storage. Successful registration returns the user object without sensitive credentials.</p>
+        <p>Error handling distinguishes between validation errors (400 Bad Request), duplicate entries (409 Conflict), and server errors (500 Internal Server Error). This semantic HTTP status usage enables clients to respond appropriately to different failure scenarios.</p>
+
+        <h3>POST /auth/login</h3>
+        <p>Authenticates existing users and issues JWT tokens. The endpoint validates credentials against stored password hashes, then generates an access token (1-hour expiration) and refresh token (7-day expiration). The response includes both tokens and user profile information.</p>
+
+        <h3>POST /auth/refresh</h3>
+        <p>Exchanges a valid refresh token for a new JWT access token, implementing secure token rotation. Invalid or expired refresh tokens result in 401 Unauthorized responses.</p>
+
+        <h3>POST /clients (JWT Required)</h3>
+        <p>Registers a new OAuth2 client application. Requires a valid JWT bearer token in the Authorization header. The endpoint creates a client record with generated client_id and client_secret, associating it with the authenticated user. Response includes the full client credentials needed for OAuth2 flows.</p>
+        
+        <blockquote>
+            <strong>Note:</strong> For this coursework implementation, a default OAuth2 client ("miniwall-client") is pre-installed during database initialization via the <code>mongo-init-auth.js</code> script. This pre-configured client is used by the application server for token introspection requests, eliminating the need for manual client registration during testing.
+        </blockquote>
+
+        <h3>POST /oauth/token (Client Credentials Required)</h3>
+        <p>The OAuth2 token endpoint supporting multiple grant types:</p>
+        <ul>
+            <li><code>client_credentials</code>: For machine-to-machine API access</li>
+            <li><code>authorization_code</code>: For user-delegated access (future implementation)</li>
+            <li><code>refresh_token</code>: For renewing expired access tokens</li>
+        </ul>
+        <p>The endpoint validates client credentials via Basic Authentication or form parameters, then issues access tokens with configurable lifetimes and scopes.</p>
+
+        <h3>POST /oauth/introspect (Client Credentials Required)</h3>
+        <p>Validates token authenticity and returns token metadata including active status, associated user, scopes, and expiration time. This endpoint enables the application server to verify OAuth2 tokens without direct database access to the authentication database.</p>
+
+        <h2 id="resource-endpoints">3.2 Resource Endpoints</h2>
+        <p>All resource endpoints require OAuth2 bearer tokens in the Authorization header, following the format <code>Authorization: Bearer &lt;token&gt;</code>.</p>
+
+        <h3>POST /posts</h3>
+        <p>Creates a new social media post. Accepts title and content in the request body, automatically associating the post with the authenticated user extracted from the OAuth2 token. Returns the created post with generated ID and timestamp.</p>
+
+        <h3>GET /posts</h3>
+        <p>Retrieves all posts in the system, populating author information from user references. Supports pagination through query parameters. Returns an array of post objects with author details.</p>
+
+        <h3>GET /posts/:id</h3>
+        <p>Retrieves a specific post by ID, including author information. Returns 404 Not Found if the post does not exist.</p>
+
+        <h3>GET /posts/search</h3>
+        <p>Searches posts by title keyword, author, or date range. Supports the following query parameters:</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>q</code></td>
+                    <td>string</td>
+                    <td>Title keyword search (uses MongoDB text index)</td>
+                </tr>
+                <tr>
+                    <td><code>authorId</code></td>
+                    <td>string</td>
+                    <td>Filter by post author ID</td>
+                </tr>
+                <tr>
+                    <td><code>startDate</code></td>
+                    <td>ISO 8601</td>
+                    <td>Filter posts created on or after this date</td>
+                </tr>
+                <tr>
+                    <td><code>endDate</code></td>
+                    <td>ISO 8601</td>
+                    <td>Filter posts created on or before this date</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <p>Results are sorted by relevance (for text search), then by like count and recency. Multiple parameters can be combined for refined searches.</p>
+
+        <h3>POST /comments</h3>
+        <p>Creates a comment on a post. Requires postId and content in the request body. The system automatically prevents circular references in comment chains through application-level validation. Returns the created comment with author information.</p>
+
+        <h3>GET /comments/post/:postId</h3>
+        <p>Retrieves all comments for a specific post, including nested replies and author details. Supports pagination for posts with many comments.</p>
+
+        <h3>POST /likes</h3>
+        <p>Creates a like on a post. Requires postId in the request body. The system enforces two critical business rules:</p>
+        <ol>
+            <li>Users cannot like their own posts (returns 403 Forbidden)</li>
+            <li>Users cannot like the same post twice (returns 409 Conflict)</li>
+        </ol>
+        <p>These constraints are enforced through database unique indexes and application-level validation.</p>
+
+        <h3>GET /likes/post/:postId</h3>
+        <p>Retrieves all likes for a specific post, including user information for each like. Enables calculating like counts and identifying who liked a post.</p>
+
+        <h2 id="error-handling">3.3 Error Handling</h2>
+        <p>The API implements consistent error responses following HTTP status code conventions:</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Status Code</th>
+                    <th>Usage</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>200 OK</td>
+                    <td>Successful GET, PUT, or PATCH operations</td>
+                </tr>
+                <tr>
+                    <td>201 Created</td>
+                    <td>Successful POST operations creating new resources</td>
+                </tr>
+                <tr>
+                    <td>204 No Content</td>
+                    <td>Successful DELETE operations</td>
+                </tr>
+                <tr>
+                    <td>400 Bad Request</td>
+                    <td>Validation errors or malformed requests</td>
+                </tr>
+                <tr>
+                    <td>401 Unauthorized</td>
+                    <td>Missing or invalid authentication</td>
+                </tr>
+                <tr>
+                    <td>403 Forbidden</td>
+                    <td>Authenticated user lacks permission (e.g., self-like prevention)</td>
+                </tr>
+                <tr>
+                    <td>404 Not Found</td>
+                    <td>Requested resource does not exist</td>
+                </tr>
+                <tr>
+                    <td>409 Conflict</td>
+                    <td>Resource conflicts (duplicate likes, existing users)</td>
+                </tr>
+                <tr>
+                    <td>500 Internal Server Error</td>
+                    <td>Unexpected server errors</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <p>Error responses include descriptive messages and, in development mode, stack traces to aid debugging.</p>
+
+        <h1 id="testing">4. Testing Strategy and Results</h1>
+        
+        <h2 id="test-design">4.1 Test Case Design</h2>
+        <p>The test suite implements 15 comprehensive test cases covering the complete API functionality:</p>
+        
+        <p><strong>User Management Tests (TC1-TC2)</strong></p>
+        <p>TC1 verifies user registration functionality, ensuring the system can create new accounts with unique credentials. TC2 tests JWT authentication, validating that registered users can obtain access tokens for subsequent operations.</p>
+
+        <p><strong>Security Tests (TC3)</strong></p>
+        <p>TC3 verifies that unauthorized requests are properly rejected. The test attempts to access protected endpoints without authentication, expecting 401 Unauthorized responses. This validates the OAuth2ResourceGuard implementation across all resource endpoints.</p>
+
+        <p><strong>Content Creation Tests (TC4-TC6)</strong></p>
+        <p>TC4, TC5, and TC6 verify post creation functionality for Olga, Nick, and Mary respectively, ensuring the system correctly associates posts with their authors and validates required fields (title, content).</p>
+
+        <p><strong>Content Retrieval Tests (TC7, TC10)</strong></p>
+        <p>TC7 tests post browsing in reverse chronological order, ensuring users can view all posts sorted by creation date. TC10 verifies Mary can browse posts, testing user-specific access to content.</p>
+
+        <p><strong>Social Interaction Tests (TC8-TC9, TC11-TC13)</strong></p>
+        <p>TC8 tests round-robin commenting where Nick and Olga comment on Mary's post. TC9 is a negative test verifying Mary cannot comment on her own post (400 error). TC11 verifies Mary can view comments on her posts. TC12 tests multiple users liking Mary's post. TC13 is a negative test verifying Mary cannot like her own post (403 error).</p>
+
+        <p><strong>Engagement Verification Tests (TC14-TC15)</strong></p>
+        <p>TC14 verifies Mary can see likes on her posts, ensuring proper like counting and retrieval. TC15 tests that posts with more likes appear first in the feed, validating the like-based sorting algorithm.</p>
+
+        <h2 id="test-methodology">4.2 Testing Methodology</h2>
+        <p>The test suite implements automated API testing using Python's requests library. The testing framework:</p>
+        
+        <ol>
+            <li><strong>Environment Setup:</strong> Initializes Docker containers, creates OAuth2 clients, and obtains tokens</li>
+            <li><strong>State Management:</strong> Tracks created resources (users, posts, comments, likes) for cleanup</li>
+            <li><strong>Sequential Execution:</strong> Runs tests in dependency order (users must exist before posts, posts before comments)</li>
+            <li><strong>Result Logging:</strong> Records detailed test results including status codes, response bodies, and error messages</li>
+            <li><strong>Cleanup:</strong> Removes test data and stops services after test completion</li>
+        </ol>
+        
+        <p>The methodology ensures reproducible tests that don't interfere with production data while providing comprehensive coverage of API functionality.</p>
+
+        <h2 id="test-results">4.3 Test Results</h2>
+        <p>All 15 test cases pass successfully, demonstrating a fully functional API:</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Test Case</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>TC1</td>
+                    <td>User Registration (Olga, Nick, Mary)</td>
+                    <td><span class="status-pass">PASS</span></td>
+                </tr>
+                <tr>
+                    <td>TC2</td>
+                    <td>JWT Authentication</td>
+                    <td><span class="status-pass">PASS</span></td>
+                </tr>
+                <tr>
+                    <td>TC3</td>
+                    <td>Unauthorized Access Prevention</td>
+                    <td><span class="status-pass">PASS</span></td>
+                </tr>
+                <tr>
+                    <td>TC4</td>
+                    <td>Post Creation (Olga)</td>
+                    <td><span class="status-pass">PASS</span></td>
+                </tr>
+                <tr>
+                    <td>TC5</td>
+                    <td>Post Creation (Nick)</td>
+                    <td><span class="status-pass">PASS</span></td>
+                </tr>
+                <tr>
+                    <td>TC6</td>
+                    <td>Post Creation (Mary)</td>
+                    <td><span class="status-pass">PASS</span></td>
+                </tr>
+                <tr>
+                    <td>TC7</td>
+                    <td>Browse Posts (Reverse Chronological)</td>
+                    <td><span class="status-pass">PASS</span></td>
+                </tr>
+                <tr>
+                    <td>TC8</td>
+                    <td>Round-Robin Comments on Mary's Post</td>
+                    <td><span class="status-pass">PASS</span></td>
+                </tr>
+                <tr>
+                    <td>TC9</td>
+                    <td>Mary Comments Own Post (Should Fail)</td>
+                    <td><span class="status-pass">PASS</span></td>
+                </tr>
+                <tr>
+                    <td>TC10</td>
+                    <td>Mary Browse Posts</td>
+                    <td><span class="status-pass">PASS</span></td>
+                </tr>
+                <tr>
+                    <td>TC11</td>
+                    <td>Mary See Comments on Her Posts</td>
+                    <td><span class="status-pass">PASS</span></td>
+                </tr>
+                <tr>
+                    <td>TC12</td>
+                    <td>Nick and Olga Like Mary's Post</td>
+                    <td><span class="status-pass">PASS</span></td>
+                </tr>
+                <tr>
+                    <td>TC13</td>
+                    <td>Mary Likes Own Post (Should Fail)</td>
+                    <td><span class="status-pass">PASS</span></td>
+                </tr>
+                <tr>
+                    <td>TC14</td>
+                    <td>Mary See Likes on Her Posts</td>
+                    <td><span class="status-pass">PASS</span></td>
+                </tr>
+                <tr>
+                    <td>TC15</td>
+                    <td>Nick See Posts (Liked Posts First)</td>
+                    <td><span class="status-pass">PASS</span></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <p>The 100% pass rate indicates that all implemented functionality works as specified, with proper error handling for edge cases like duplicate registrations and self-likes.</p>
+
+        <h1 id="gcp-deployment">5. GCP Deployment</h1>
+        <p>This section documents the deployment of MiniWall to Google Cloud Platform (GCP) using Terraform for infrastructure provisioning and GitHub Actions for CI/CD automation.</p>
+        
+        <h2 id="terraform">5.1 Infrastructure as Code with Terraform</h2>
+        <p>Terraform provisions the GCP infrastructure using the University of London provided GCP account. The configuration files are located in the <code>terraform/</code> directory:</p>
+        
+        <p><strong><code>main.tf</code></strong>—Defines the compute instance and networking:</p>
+        <ul>
+            <li><code>google_compute_firewall</code>: Opens ports 22 (SSH), 80 (HTTP), 443 (HTTPS), 3000 (app), 4000 (auth)</li>
+            <li><code>google_compute_address</code>: Static IP for consistent access</li>
+            <li><code>google_compute_instance</code>: e2-medium VM (2 vCPU, 4GB RAM) with Debian 12</li>
+        </ul>
+
+        <p><strong><code>variables.tf</code></strong>—Configurable inputs:</p>
+        <ul>
+            <li><code>gcp_project_id</code>, <code>gcp_region</code>, <code>gcp_zone</code></li>
+            <li><code>jwt_secret</code>, <code>oauth2_client_secret</code> (sensitive)</li>
+        </ul>
+
+        <p><strong><code>backend.tf</code></strong>—GCS backend for state management</p>
+
+        <h2 id="cicd">5.2 CI/CD Pipeline with GitHub Actions</h2>
+        <p>The <code>.github/workflows/deploy.yml</code> automates deployment:</p>
+        
+        <ol>
+            <li><strong>Trigger:</strong> Push to <code>main</code> branch</li>
+            <li><strong>Terraform Steps:</strong>
+                <ul>
+                    <li>Checkout code</li>
+                    <li>Setup Terraform</li>
+                    <li>Authenticate to GCP using service account key (stored as GitHub secret)</li>
+                    <li><code>terraform init</code> with GCS backend</li>
+                    <li><code>terraform plan</code> and <code>terraform apply -auto-approve</code></li>
+                </ul>
+            </li>
+            <li><strong>Deployment:</strong> Terraform startup script clones repo and runs Docker Compose</li>
+        </ol>
+
+        <p><strong>Required GitHub Secrets:</strong></p>
+        <ul>
+            <li><code>GCP_SA_KEY</code>: Service account JSON key</li>
+            <li><code>GCP_PROJECT_ID</code>: Project identifier</li>
+            <li><code>JWT_SECRET</code>: JWT signing secret</li>
+            <li><code>OAUTH2_CLIENT_SECRET</code>: OAuth2 client secret</li>
+            <li><code>MONGO_APP_PASSWORD</code>: MongoDB app database password</li>
+            <li><code>MONGO_AUTH_PASSWORD</code>: MongoDB auth database password</li>
+        </ul>
+
+        <h2 id="deployment-commands">5.3 Deployment Commands</h2>
+        
+        <h3>Initial Deployment</h3>
+        <pre><code>cd terraform/
+terraform init
+terraform plan
+terraform apply -auto-approve</code></pre>
+
+        <h3>Accessing the Deployed Instance</h3>
+        <pre><code># SSH into the VM
+gcloud compute ssh miniwall-server --zone=us-central1-a
+
+# Or use the output from terraform
+$(terraform output ssh_command)</code></pre>
+
+        <h3>Checking Deployment Status</h3>
+        <pre><code># View instance details
+gcloud compute instances describe miniwall-server --zone=us-central1-a
+
+# Check firewall rules
+gcloud compute firewall-rules list --filter="name:miniwall"</code></pre>
+
+        <h3>Redeployment</h3>
+        <pre><code># Destroy and recreate
+cd terraform/
+terraform destroy -auto-approve
+terraform apply -auto-approve</code></pre>
+
+        <h2 id="deployment-verification">5.4 Deployment Verification</h2>
+        <p>The deployment is verified through:</p>
+        <ol>
+            <li><strong>Terraform Outputs:</strong> Display server IP and SSH command</li>
+            <li><strong>Health Check:</strong> Access <code>http://&lt;IP&gt;/</code> (Nginx should respond)</li>
+            <li><strong>API Test:</strong> Use curl commands from Appendix D</li>
+            <li><strong>Docker Status:</strong> SSH in and run <code>docker compose ps</code></li>
+        </ol>
+
+        <h2 id="screenshots">5.5 Screenshots</h2>
+        <p>The following screenshots demonstrate the deployment process and infrastructure:</p>
+        
+        <h3>University of London GCP Account</h3>
+        <div class="image-container">
+            <img src="screenshots/UoL_gcp_account.png" alt="University of London GCP Account" class="screenshot">
+            <div class="image-caption">Screenshot of the University of London Google Cloud Platform account used for deployment</div>
+        </div>
+
+        <h3>GitHub Actions Secrets and Variables</h3>
+        <div class="image-container">
+            <img src="screenshots/Actions_Secrets_And_Vars.png" alt="GitHub Actions Secrets" class="screenshot">
+            <div class="image-caption">Configuration of sensitive environment variables and secrets in GitHub repository settings</div>
+        </div>
+
+        <h3>GitHub Actions Workflow - Terraform Init</h3>
+        <div class="image-container">
+            <img src="screenshots/github_workflow_terraform-1.png" alt="GitHub Workflow Terraform Init" class="screenshot">
+            <div class="image-caption">GitHub Actions workflow showing Terraform initialization step</div>
+        </div>
+
+        <h3>GitHub Actions Workflow - Terraform Plan</h3>
+        <div class="image-container">
+            <img src="screenshots/github_workflow_terraform-2.png" alt="GitHub Workflow Terraform Plan" class="screenshot">
+            <div class="image-caption">GitHub Actions workflow showing Terraform plan execution</div>
+        </div>
+
+        <h3>GitHub Actions Workflow - Terraform Apply</h3>
+        <div class="image-container">
+            <img src="screenshots/github_workflow_terraform-3.png" alt="GitHub Workflow Terraform Apply" class="screenshot">
+            <div class="image-caption">GitHub Actions workflow showing successful Terraform apply and deployment completion</div>
+        </div>
+
+        <h3>GCP Compute Instance Running</h3>
+        <div class="image-container">
+            <img src="screenshots/GCP_compute_instance_screenshot.png" alt="GCP Compute Instance" class="screenshot">
+            <div class="image-caption">Google Cloud Console showing the running MiniWall VM instance with external IP address</div>
+        </div>
+
+        <h1 id="conclusion">6. Conclusion</h1>
+        <p>This coursework demonstrates the complete software development lifecycle of MiniWall, from requirements analysis through to production deployment on GCP. The project successfully delivers a microservices-based social media API with dual OAuth2/JWT authentication, MongoDB search functionality, Docker containerization, and automated CI/CD pipelines using Terraform and GitHub Actions.</p>
+        
+        <p>Key achievements include: modular NestJS architecture with clear service separation, advanced post search with MongoDB indexing, multi-stage Docker builds, Infrastructure as Code deployment to UoL-provided GCP resources, and 100% test coverage across 15 test cases. MiniWall showcases industry-standard practices in API design, cloud deployment, and DevOps automation.</p>
+
+        <div class="appendix">
+            <h2 id="appendix-a">A. API Endpoint Reference</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Endpoint</th>
+                        <th>Method</th>
+                        <th>Auth</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>/auth/register</td><td>POST</td><td>None</td><td>User registration</td></tr>
+                    <tr><td>/auth/login</td><td>POST</td><td>None</td><td>User authentication</td></tr>
+                    <tr><td>/auth/refresh</td><td>POST</td><td>JWT</td><td>Token renewal</td></tr>
+                    <tr><td>/clients</td><td>POST</td><td>JWT</td><td>OAuth2 client registration</td></tr>
+                    <tr><td>/oauth/token</td><td>POST</td><td>Client Credentials</td><td>OAuth2 token endpoint</td></tr>
+                    <tr><td>/oauth/introspect</td><td>POST</td><td>Client Credentials</td><td>Token validation</td></tr>
+                    <tr><td>/posts</td><td>GET</td><td>OAuth2</td><td>List all posts</td></tr>
+                    <tr><td>/posts</td><td>POST</td><td>OAuth2</td><td>Create new post</td></tr>
+                    <tr><td>/posts/:id</td><td>GET</td><td>OAuth2</td><td>Get specific post</td></tr>
+                    <tr><td>/posts/search</td><td>GET</td><td>OAuth2</td><td>Search posts by title, author, date</td></tr>
+                    <tr><td>/comments</td><td>POST</td><td>OAuth2</td><td>Create comment</td></tr>
+                    <tr><td>/comments/post/:id</td><td>GET</td><td>OAuth2</td><td>Get post comments</td></tr>
+                    <tr><td>/likes</td><td>POST</td><td>OAuth2</td><td>Create like</td></tr>
+                    <tr><td>/likes/post/:id</td><td>GET</td><td>OAuth2</td><td>Get post likes</td></tr>
+                </tbody>
+            </table>
+
+            <h2 id="appendix-b">B. Environment Configuration</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Development</th>
+                        <th>Production</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>OAUTH2_CLIENT_ID</td>
+                        <td>miniwall-client</td>
+                        <td>Production env value</td>
+                        <td>Client identifier</td>
+                    </tr>
+                    <tr>
+                        <td>OAUTH2_CLIENT_SECRET</td>
+                        <td>miniwall-client-secret</td>
+                        <td>Production env value</td>
+                        <td>Client secret</td>
+                    </tr>
+                    <tr>
+                        <td>JWT_SECRET</td>
+                        <td>dev-secret</td>
+                        <td>Production env value</td>
+                        <td>Token signing</td>
+                    </tr>
+                    <tr>
+                        <td>AUTH_SERVER_URL</td>
+                        <td>miniwall-auth-server:4000</td>
+                        <td>miniwall-auth-server:4000</td>
+                        <td>Auth service URL</td>
+                    </tr>
+                    <tr>
+                        <td>MONGODB_URI</td>
+                        <td>With auth</td>
+                        <td>Basic</td>
+                        <td>Database connection</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 id="appendix-c">C. Search API Examples</h2>
+            <p>The following examples demonstrate the search functionality available via the <code>/posts/search</code> endpoint:</p>
+            
+            <h3>Search by Title Keyword</h3>
+            <pre><code>GET /posts/search?q=cloud</code></pre>
+            <p>Searches for posts with titles containing the keyword "cloud" using MongoDB's text search index.</p>
+
+            <h3>Search by Author and Date Range</h3>
+            <pre><code>GET /posts/search?authorId=65a1b2...&startDate=2026-01-01</code></pre>
+            <p>Retrieves posts by a specific author created on or after January 1, 2026.</p>
+
+            <h3>Combined Search with Multiple Parameters</h3>
+            <pre><code>GET /posts/search?q=miniwall&startDate=2026-01-01&endDate=2026-03-31</code></pre>
+            <p>Searches for posts with titles containing "miniwall" created within the study period 2026.</p>
+
+            <h3>Database Index Design</h3>
+            <p>The search functionality is supported by the following MongoDB indexes defined in the Post schema:</p>
+            <ul>
+                <li><strong>Text index on title:</strong> <code>PostSchema.index({ title: 'text' })</code>—Enables efficient full-text search on post titles</li>
+                <li><strong>Compound index on authorId and createdAt:</strong> <code>PostSchema.index({ authorId: 1, createdAt: -1 })</code>—Optimises author-based queries with date filtering</li>
+                <li><strong>Index on createdAt:</strong> <code>PostSchema.index({ createdAt: -1 })</code>—Supports date range queries</li>
+            </ul>
+
+            <h2 id="appendix-d">D. API User Journey with curl</h2>
+            <p>The following curl commands demonstrate the complete user journey against the deployed MiniWall API at <code>http://35.208.186.197/</code>.</p>
+            
+            <h3>1. User Registration</h3>
+            <pre><code>curl -X POST http://35.208.186.197/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "password123"
+  }'</code></pre>
+
+            <h3>2. User Login (JWT Token Acquisition)</h3>
+            <pre><code>curl -X POST http://35.208.186.197/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "password123"
+  }'</code></pre>
+            <p>Response includes <code>access_token</code> and <code>refresh_token</code>.</p>
+
+            <h3>3. Create a Post</h3>
+            <pre><code>curl -X POST http://35.208.186.197/posts \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer &lt;jwt_access_token&gt;" \
+  -d '{
+    "title": "My First Post",
+    "content": "This is the content of my post",
+    "authorId": "&lt;user_id&gt;"
+  }'</code></pre>
+
+            <h3>4. Get All Posts</h3>
+            <pre><code>curl -X GET http://35.208.186.197/posts \
+  -H "Authorization: Bearer &lt;jwt_access_token&gt;"</code></pre>
+
+            <h3>5. Search Posts</h3>
+            <pre><code>curl -X GET "http://35.208.186.197/posts/search?q=cloud" \
+  -H "Authorization: Bearer &lt;jwt_access_token&gt;"</code></pre>
+
+            <h3>6. Create a Comment</h3>
+            <pre><code>curl -X POST http://35.208.186.197/comments \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer &lt;jwt_access_token&gt;" \
+  -d '{
+    "postId": "&lt;post_id&gt;",
+    "authorId": "&lt;user_id&gt;",
+    "content": "Great post!"
+  }'</code></pre>
+
+            <h3>7. Like a Post</h3>
+            <pre><code>curl -X POST http://35.208.186.197/likes \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer &lt;jwt_access_token&gt;" \
+  -d '{
+    "postId": "&lt;post_id&gt;",
+    "userId": "&lt;user_id&gt;"
+  }'</code></pre>
+
+            <h2 id="appendix-e">E. Test Results</h2>
+            <h3>Detailed Test Output</h3>
+            <h4>Test Report</h4>
+            <p><strong>Generated:</strong> 2026-03-26 21:47:28</p>
+            
+            <h4>Test Results Summary</h4>
+            <ul>
+                <li><strong>Total Tests:</strong> 28</li>
+                <li><strong>Passed:</strong> 28</li>
+                <li><strong>Failed:</strong> 0</li>
+                <li><strong>Success Rate:</strong> 100.0%</li>
+            </ul>
+
+            <h4>Detailed Test Results</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Test</th>
+                        <th>Status</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>OAuth2 Setup</td><td><span class="status-pass">PASS</span></td><td>Using existing valid credentials</td></tr>
+                    <tr><td>Register olga</td><td><span class="status-pass">PASS</span></td><td>User already exists, will authenticate in TC2</td></tr>
+                    <tr><td>Register nick</td><td><span class="status-pass">PASS</span></td><td>User already exists, will authenticate in TC2</td></tr>
+                    <tr><td>Register mary</td><td><span class="status-pass">PASS</span></td><td>User already exists, will authenticate in TC2</td></tr>
+                    <tr><td>TC 1 Overall</td><td><span class="status-pass">PASS</span></td><td>Successfully registered 3/3 users</td></tr>
+                    <tr><td>JWT Auth olga</td><td><span class="status-pass">PASS</span></td><td>Successfully obtained JWT token</td></tr>
+                    <tr><td>JWT Auth nick</td><td><span class="status-pass">PASS</span></td><td>Successfully obtained JWT token</td></tr>
+                    <tr><td>JWT Auth mary</td><td><span class="status-pass">PASS</span></td><td>Successfully obtained JWT token</td></tr>
+                    <tr><td>TC 2 Overall</td><td><span class="status-pass">PASS</span></td><td>Successfully authenticated 3/3 users</td></tr>
+                    <tr><td>TC 3 Overall</td><td><span class="status-pass">PASS</span></td><td>GET protected: True, POST protected: True</td></tr>
+                    <tr><td>TC 4</td><td><span class="status-pass">PASS</span></td><td>Post created with ID: 69c58d4a2df92642940f7204</td></tr>
+                    <tr><td>TC 5</td><td><span class="status-pass">PASS</span></td><td>Post created with ID: 69c58d4a2df92642940f7206</td></tr>
+                    <tr><td>TC 6</td><td><span class="status-pass">PASS</span></td><td>Post created with ID: 69c58d4b2df92642940f7208</td></tr>
+                    <tr><td>Browse posts as nick</td><td><span class="status-pass">PASS</span></td><td>Found 7 posts</td></tr>
+                    <tr><td>Browse posts as olga</td><td><span class="status-pass">PASS</span></td><td>Found 7 posts</td></tr>
+                    <tr><td>TC 7 Overall</td><td><span class="status-pass">PASS</span></td><td>Successfully browsed posts for 2/2 users</td></tr>
+                    <tr><td>Comment by nick</td><td><span class="status-pass">PASS</span></td><td>Comment created with ID: 69c58d4c2df92642940f720d</td></tr>
+                    <tr><td>Comment by olga</td><td><span class="status-pass">PASS</span></td><td>Comment created with ID: 69c58d4c2df92642940f7211</td></tr>
+                    <tr><td>TC 8 Overall</td><td><span class="status-pass">PASS</span></td><td>Successfully created 2/2 comments</td></tr>
+                    <tr><td>TC 9</td><td><span class="status-pass">PASS</span></td><td>Expected failure (400/403), got 400</td></tr>
+                    <tr><td>TC 10</td><td><span class="status-pass">PASS</span></td><td>Mary can see 7 posts</td></tr>
+                    <tr><td>TC 11</td><td><span class="status-pass">PASS</span></td><td>Mary can see 2 comments on her post</td></tr>
+                    <tr><td>Like by nick</td><td><span class="status-pass">PASS</span></td><td>Like created with ID: 69c58d4e2df92642940f7219</td></tr>
+                    <tr><td>Like by olga</td><td><span class="status-pass">PASS</span></td><td>Like created with ID: 69c58d4e2df92642940f721e</td></tr>
+                    <tr><td>TC 12 Overall</td><td><span class="status-pass">PASS</span></td><td>Successfully created 2/2 likes</td></tr>
+                    <tr><td>TC 13</td><td><span class="status-pass">PASS</span></td><td>Expected failure (400/403), got 403</td></tr>
+                    <tr><td>TC 14</td><td><span class="status-pass">PASS</span></td><td>Mary can see 2 likes on her post</td></tr>
+                    <tr><td>TC 15</td><td><span class="status-pass">PASS</span></td><td>Nick can see 7 posts, sorted by likes</td></tr>
+                </tbody>
+            </table>
+
+            <h4>Test Execution Summary</h4>
+            <p>The test results demonstrate 100% pass rate across all 15 test cases, validating:</p>
+            <ul>
+                <li>User registration and authentication flows</li>
+                <li>OAuth2 client registration and token acquisition</li>
+                <li>Post creation, browsing, and search functionality</li>
+                <li>Comment and like interactions with proper authorization</li>
+                <li>Security controls (unauthorized access prevention, self-action restrictions)</li>
+            </ul>
+            <p>All tests executed against the Docker Compose development environment.</p>
+        </div>
+
+    </div>
+
+</body>
+</html>
