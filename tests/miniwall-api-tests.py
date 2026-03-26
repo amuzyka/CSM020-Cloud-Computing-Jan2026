@@ -370,6 +370,7 @@ class MiniWallAPITester:
         headers = self.get_auth_headers()  # Use OAuth2 token for API access
         post_data = {
             "authorId": self.olga.user_id,
+            "title": "Olga's First Post",
             "content": "Hello from Olga! This is my first post on MiniWall.",
             "isPublished": True
         }
@@ -403,6 +404,7 @@ class MiniWallAPITester:
         headers = self.get_auth_headers()  # Use OAuth2 token for API access
         post_data = {
             "authorId": self.nick.user_id,
+            "title": "Nick's First Post",
             "content": "Nick here! Excited to be part of MiniWall community.",
             "isPublished": True
         }
@@ -436,6 +438,7 @@ class MiniWallAPITester:
         headers = self.get_auth_headers()  # Use OAuth2 token for API access
         post_data = {
             "authorId": self.mary.user_id,
+            "title": "Mary's First Post",
             "content": "Mary's first post! Looking forward to connecting with friends here.",
             "isPublished": True
         }
@@ -520,7 +523,7 @@ class MiniWallAPITester:
                 self.log_test(f"Comment by {commenter.username}", False, "Missing token or user ID")
                 continue
             
-            headers = self.get_auth_headers()  # Use OAuth2 token for API access
+            headers = self.get_user_auth_headers(commenter)  # Use JWT token for user identity
             comment_data = {
                 "postId": mary_post["id"],
                 "authorId": commenter.user_id,
@@ -677,7 +680,7 @@ class MiniWallAPITester:
                 self.log_test(f"Like by {liker.username}", False, "Missing token or user ID")
                 continue
             
-            headers = self.get_auth_headers()  # Use OAuth2 token for API access
+            headers = self.get_user_auth_headers(liker)  # Use JWT token for user identity
             like_data = {
                 "postId": mary_post["id"],
                 "userId": liker.user_id

@@ -86,7 +86,7 @@ def cleanup_test_data():
     if not credentials:
         return False
     
-    # FIXED: Correct URLs matching nginx config (no /api/ prefix)
+
     base_url = "http://localhost"
     auth_base_url = f"{base_url}/auth"
     app_base_url = base_url
@@ -97,7 +97,6 @@ def cleanup_test_data():
         
         # 1. Delete OAuth2 client
         print("1. Deleting OAuth2 clients...")
-        # FIXED: Use base_url for /clients endpoint (not auth_base_url)
         clients_response = requests.get(f"{base_url}/clients", headers=headers)
         if clients_response.status_code == 200:
             clients = clients_response.json()
@@ -203,3 +202,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
