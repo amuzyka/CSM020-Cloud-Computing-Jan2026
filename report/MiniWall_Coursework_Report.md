@@ -90,6 +90,14 @@ The system comprises three primary components:
 **Authentication Server (Port 4000)**
 The authentication server handles all identity-related operations including user registration, login, token generation, and token introspection. Built with NestJS and MongoDB, it implements both JWT for session management and OAuth2 for third-party client authorization. The server maintains its own database (`miniwall-auth`) for user credentials, OAuth2 client registrations, and refresh token storage.
 
+An OAuth client registry is a secure repository within the authorization server that stores registered third-party application details.
+
+The client registry supports two registration types:
+
+- **Manual Registration**: Pre-configured clients created via database initialization scripts. The `mongo-init-auth.js` script pre-registers the "miniwall-client" for the miniwall-app, enabling immediate authentication without runtime registration.
+
+- **Dynamic Registration**: Runtime client creation via the `POST /clients` endpoint, requiring JWT authentication. This allows third-party applications to self-register programmatically.
+
 **Application Server (Port 3000)**
 The application server manages core social media functionality including posts, comments, and likes. It requires OAuth2 bearer tokens for access control and communicates with the authentication server via token introspection to validate requests. This server maintains a separate MongoDB database (`miniwall`) for content storage.
 
@@ -520,12 +528,31 @@ The deployment is verified through:
 
 ### 5.5 Screenshots
 
-*[Screenshots to be added showing:]*
-- Terraform plan/apply output
-- GCP Console VM instance running
-- GitHub Actions workflow success
-- API health check response
-- Docker containers running on VM
+The following screenshots demonstrate the deployment process and infrastructure:
+
+**University of London GCP Account**
+![UoL GCP Account](screenshots/UoL_gcp_account.png)
+*Screenshot of the University of London Google Cloud Platform account used for deployment*
+
+**GitHub Actions Secrets and Variables**
+![GitHub Actions Secrets](screenshots/Actions_Secrets_And_Vars.png)
+*Configuration of sensitive environment variables and secrets in GitHub repository settings*
+
+**GitHub Actions Workflow - Terraform Init**
+![GitHub Workflow Terraform 1](screenshots/github_workflow_terraform-1.png)
+*GitHub Actions workflow showing Terraform initialization step*
+
+**GitHub Actions Workflow - Terraform Plan**
+![GitHub Workflow Terraform 2](screenshots/github_workflow_terraform-2.png)
+*GitHub Actions workflow showing Terraform plan execution*
+
+**GitHub Actions Workflow - Terraform Apply**
+![GitHub Workflow Terraform 3](screenshots/github_workflow_terraform-3.png)
+*GitHub Actions workflow showing successful Terraform apply and deployment completion*
+
+**GCP Compute Instance Running**
+![GCP Compute Instance](screenshots/GCP_compute_instance_screenshot.png)
+*Google Cloud Console showing the running MiniWall VM instance with external IP address*
 
 ## 6. Conclusion
 
