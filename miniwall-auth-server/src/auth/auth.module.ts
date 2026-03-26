@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { User, UserSchema } from './schemas/user.schema';
 import { Client, ClientSchema } from './schemas/client.schema';
+import { TokenBlacklist, TokenBlacklistSchema } from './schemas/token-blacklist.schema';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { OAuth2Controller } from './oauth2.controller';
 import { OAuth2Service } from './oauth2.service';
@@ -17,7 +18,8 @@ import { ClientCredentialsGuard } from './guards/client-credentials.guard';
   imports: [
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
-      { name: Client.name, schema: ClientSchema }
+      { name: Client.name, schema: ClientSchema },
+      { name: TokenBlacklist.name, schema: TokenBlacklistSchema }
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],

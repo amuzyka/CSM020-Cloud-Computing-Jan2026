@@ -5,6 +5,8 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { ClientService } from './services/client.service';
 import { ClientDocument } from './schemas/client.schema';
+import { User, UserDocument } from './schemas/user.schema';
+import { TokenBlacklist, TokenBlacklistDocument } from './schemas/token-blacklist.schema';
 
 @Injectable()
 export class OAuth2Service {
@@ -12,6 +14,10 @@ export class OAuth2Service {
     private authService: AuthService,
     private jwtService: JwtService,
     private clientService: ClientService,
+    @InjectModel(User.name)
+    private userModel: Model<UserDocument>,
+    @InjectModel(TokenBlacklist.name)
+    private tokenBlacklistModel: Model<TokenBlacklistDocument>,
   ) {}
 
   async authorize(clientId: string, redirectUri: string, responseType: string, scope?: string) {
@@ -96,56 +102,178 @@ export class OAuth2Service {
 
   async introspect(token: string) {
     try {
-      const payload = this.jwtService.verify(token);
-
-      // Handle user JWT tokens (from /auth/login)
-      if (payload.username && payload.sub) {
-        return {
-          active: true,
-          scope: payload.roles?.join(' ') || 'read',
-          username: payload.username,
-          sub: payload.sub,
-          exp: payload.exp,
-          iat: payload.iat,
-          token_type: 'Bearer',
+      // Verify token signature and decode payload
+      let payload;
+      try {
+        payload = this.jwtService.verify(token, { complete: true });
+      } catch (error) {
+        return { 
+          active: false,
+          error: 'invalid_token',
+          error_description: 'Token signature verification failed'
         };
       }
 
-      // Handle OAuth2 client tokens (from /oauth/token)
-      if (payload.client_id) {
-        const client = await this.clientService.findByClientId(payload.client_id);
-        if (!client) {
-          return { active: false };
+      const tokenData = payload.payload;
+      const tokenJti = tokenData.jti || this.generateTokenHash(token);
+
+      // 1. Check if token is in blacklist (revoked)
+      const isBlacklisted = await this.tokenBlacklistModel.findOne({ tokenJti });
+      if (isBlacklisted) {
+        return { 
+          active: false,
+          error: 'token_revoked',
+          error_description: 'Token has been revoked',
+          revoked_at: isBlacklisted.revokedAt
+        };
+      }
+
+      // 2. Check token expiration explicitly
+      const currentTime = Math.floor(Date.now() / 1000);
+      if (tokenData.exp && tokenData.exp < currentTime) {
+        return { 
+          active: false,
+          error: 'token_expired',
+          error_description: 'Token has expired'
+        };
+      }
+
+      // 3. Handle user JWT tokens (from /auth/login)
+      if (tokenData.username && tokenData.sub) {
+        // Verify user still exists and is active
+        const user = await this.userModel.findById(tokenData.sub);
+        
+        if (!user) {
+          return { 
+            active: false,
+            error: 'user_not_found',
+            error_description: 'User associated with token no longer exists'
+          };
         }
+
+        if (!user.isActive) {
+          return { 
+            active: false,
+            error: 'user_inactive',
+            error_description: 'User account is disabled'
+          };
+        }
+
+        // Check if user's roles have changed (optional: compare with token roles)
+        const currentRoles = user.roles || ['user'];
+        const tokenRoles = tokenData.roles || ['user'];
+        
         return {
           active: true,
-          scope: payload.scopes?.join(' ') || 'read',
-          client_id: payload.client_id,
-          username: payload.username || null,
-          exp: payload.exp,
-          iat: payload.iat,
+          scope: currentRoles.join(' '),
+          username: user.username,
+          sub: user._id.toString(),
+          exp: tokenData.exp,
+          iat: tokenData.iat,
+          token_type: 'Bearer',
+          client_id: null,
+        };
+      }
+
+      // 4. Handle OAuth2 client tokens (from /oauth/token)
+      if (tokenData.client_id) {
+        const client = await this.clientService.findByClientId(tokenData.client_id);
+        
+        if (!client) {
+          return { 
+            active: false,
+            error: 'client_not_found',
+            error_description: 'Client associated with token no longer exists'
+          };
+        }
+
+        if (!client.isActive) {
+          return { 
+            active: false,
+            error: 'client_inactive',
+            error_description: 'Client has been deactivated'
+          };
+        }
+
+        // Validate that token scopes are still allowed for this client
+        const tokenScopes = tokenData.scopes || ['read'];
+        const allowedScopes = client.allowedScopes || ['read'];
+        const validScopes = tokenScopes.filter(scope => allowedScopes.includes(scope));
+
+        return {
+          active: true,
+          scope: validScopes.join(' '),
+          client_id: client.clientId,
+          username: tokenData.username || null,
+          sub: tokenData.sub || null,
+          exp: tokenData.exp,
+          iat: tokenData.iat,
           token_type: 'Bearer',
         };
       }
 
-      return { active: false };
+      return { 
+        active: false,
+        error: 'invalid_token',
+        error_description: 'Unknown token type'
+      };
     } catch (error) {
-      return { active: false };
+      return { 
+        active: false,
+        error: 'token_validation_failed',
+        error_description: error.message || 'Token validation failed'
+      };
     }
   }
 
   async revoke(token: string) {
     try {
-      // In real implementation, add token to blacklist
-      const payload = this.jwtService.verify(token);
-      
-      // Could store revoked tokens in Redis with TTL
+      // Verify and decode token to get expiration info
+      let payload;
+      try {
+        payload = this.jwtService.verify(token, { complete: true });
+      } catch (error) {
+        return { 
+          active: false,
+          error: 'invalid_token',
+          error_description: 'Cannot revoke invalid token'
+        };
+      }
+
+      const tokenData = payload.payload;
+      const tokenJti = tokenData.jti || this.generateTokenHash(token);
+
+      // Check if already revoked
+      const existing = await this.tokenBlacklistModel.findOne({ tokenJti });
+      if (existing) {
+        return {
+          active: false,
+          revoked_at: existing.revokedAt,
+          message: 'Token was already revoked'
+        };
+      }
+
+      // Add token to blacklist
+      const blacklistedToken = new this.tokenBlacklistModel({
+        tokenJti,
+        revokedAt: new Date(),
+        expiresAt: tokenData.exp ? new Date(tokenData.exp * 1000) : new Date(Date.now() + 24 * 60 * 60 * 1000), // Default 24h if no exp
+        reason: 'user_initiated_revoke'
+      });
+
+      await blacklistedToken.save();
+
       return { 
         active: false,
-        revoked_at: new Date().toISOString(),
+        revoked_at: blacklistedToken.revokedAt,
+        message: 'Token revoked successfully'
       };
     } catch (error) {
-      return { active: false };
+      return { 
+        active: false,
+        error: 'revocation_failed',
+        error_description: error.message || 'Failed to revoke token'
+      };
     }
   }
 
@@ -153,5 +281,10 @@ export class OAuth2Service {
     // Generate a cryptographically secure authorization code
     const data = `${clientId}:${redirectUri}:${scopes.join(',')}:${Date.now()}`;
     return Buffer.from(data).toString('base64').replace(/[^a-zA-Z0-9]/g, '').substring(0, 32);
+  }
+
+  private generateTokenHash(token: string): string {
+    const crypto = require('crypto');
+    return crypto.createHash('sha256').update(token).digest('hex');
   }
 }
